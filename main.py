@@ -1,9 +1,10 @@
-import Tkinter, queue
+import Tkinter#, queue
 from random import randint
 
 # CLASSES
 class Player():
-    pass
+    def __init__(self):
+        self.hand = []
 
 class Stack:
     def __init__(self):
@@ -46,11 +47,29 @@ class Card():
 
 
 # FUNCTIONS
-def get_score():
+def get_score(self):
 	# Input: list of card objects
 	# Output: possible scores as list of integers
 	# Purpose: parse the list of card objects and return their values
-    pass
+	
+    scores=[0]
+    hasAce=False
+    trigger=True
+    for card in self.hand:
+            if(card.name=="Ace"):
+                hasAce=True
+    if(hasAce):
+        scores.append(0)
+        for card in self.hand:
+            if(card.name=="Ace" and trigger):
+                scores[1]+=card.value[1]
+            else:
+                scores[1]+=card.value[0]
+            trigger=False
+    for card in self.hand:
+        scores[0]+=card.value[0]
+    print scores
+        
 
 def get_bust_chance():
 	# Input: list of hand card objects (list)
@@ -64,11 +83,13 @@ def shuffle_cards():
 	# Purpose: empties the cards in the deck and creates a new deck
     pass
 
-def hit():
+def hit(self):
 	# Input: player object
 	# Output: none
 	# Purpose: takes the player's hand and adds a card to it. Detects a win/lose scenario and reacts accordingly.
-    pass
+	self.hand.append(deck.pop())
+	
+	
 
 def lose():
 	# Input: player object
@@ -105,7 +126,20 @@ for suit in card_suits:
     for name in card_names:
         deck.push(Card(name, suit, [10]))
 
-deck.print_deck()
+#deck.print_deck()
 deck.shuffle()
-print("\n\n")
-deck.print_deck()
+#print("\n\n")
+#deck.print_deck()
+
+#score testing
+deck.push(Card("Ace", "Spades", [1,11]))
+deck.push(Card("Ace", "Spades", [1,11]))
+deck.push(Card("Ace", "Spades", [1,11]))
+
+me = Player()
+hit(me)
+hit(me)
+hit(me)
+get_score(me)
+
+
