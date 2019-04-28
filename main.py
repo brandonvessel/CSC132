@@ -68,6 +68,7 @@ class Stack:
     
     def shuffle(self):
         # Shuffles all the cards in the deck multiple times
+        shuffle_cards()
         for j in range(0, 52):
             for i in range(0, len(self.cards) - 1):
                 random_index = randint(0, len(self.cards) - 1)
@@ -161,21 +162,30 @@ def win():
 ##### Deck initialization ####
 # Make deck as a stack object
 deck = Stack()
-shuffle_cards()
-#deck.print_deck()
 
-#print("\n\n")
+#shuffle_cards()
+deck.shuffle()
+deck.print_deck()
+
+print("\n\n")
 #deck.print_deck()
 
 #score testing
-deck.push(Card("Ace", "Spades", [1,11]))
-deck.push(Card("Ace", "Spades", [1,11]))
-deck.push(Card("Ace", "Spades", [1,11]))
+#deck.push(Card("Ace", "Spades", [1,11]))
+#deck.push(Card("Ace", "Spades", [1,11]))
+#deck.push(Card("Ace", "Spades", [1,11]))
+
+print("_"*30)
+print("\nTESTING SCORE MECHANICS")
+print("_"*30)
 
 me = Player()
-hit(me)
-hit(me)
-hit(me)
-hit(me)
-me.get_score()
-
+print("NEXT CARD: " + str(deck.peek()))
+for i in range(2):
+    hit(me)
+    print("_"*30)
+    print("Hand:")
+    for card in me.hand:
+        print(card)
+    me.get_score()
+    print("NEXT CARD: " + str(deck.peek()))
