@@ -116,10 +116,15 @@ class Card():
         self.suit = suit    # The suit of the card (Spades, Hearts, Diamonds, Clubs)
         self.value = values # The numerical value of the card (integer)
         if(self.value[0] == 10 and self.name[0] == "1"):
-            self.image = "sprites/cards/{}{}.png".format("10", suit[0])
+            # Special case for the 10 because it is weird
+            self.image = pygame.image.load("./sprites/cards/{}{}.png".format("10", suit[0]))
         else:
-            self.image = "sprites/cards/{}{}.png".format(name[0], suit[0])
-    
+            # Get name of the card using its name and suit
+            self.image = pygame.image.load("./sprites/cards/{}{}.png".format(name[0], suit[0]))
+        
+        # Change card size to fit on the screen
+        self.image = pygame.transform.scale(self.image, (229, 349))
+
 
     def __str__(self):
         # Ex: "King of Clubs"
@@ -177,7 +182,7 @@ def place_card(x, y, image):
 ################### Main ###################
 ############################################
 
-#pygame setup
+##### Pygame Setup #####
 display_width = 800
 display_height = 600
 x = 50
@@ -188,28 +193,9 @@ pygame.display.set_caption('pygame test')
 black = (0,0,0)
 green = (0,255,0)
 
-
 clock = pygame.time.Clock()
-aceImage = pygame.image.load('Ace_Diamonds.png')
 crashed = False
 
-for card in Player.hand:
-    card.image = 
-while not crashed:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            crashed = True
-
-    gameDisplay.fill(green)
-    for card in Player.hand:
-        place_card(x, y, card.image)
-        x += 50
-
-    pygame.display.update()
-    clock.tick(60)
-    
-pygame.quit()
-quit()
 ##### Deck initialization ####
 # Make deck as a stack object
 deck = Stack()
@@ -242,3 +228,19 @@ for i in range(2):
         print(card.image)
     me.get_score()
     print("NEXT CARD: " + str(deck.peek()))
+
+while not crashed:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            crashed = True
+
+    gameDisplay.fill(green)
+    for card in me.hand:
+        place_card(x, y, card.image)
+        #x += 50
+
+    pygame.display.update()
+    clock.tick(60)
+    
+pygame.quit()
+quit()
