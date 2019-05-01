@@ -3,6 +3,7 @@ from random import randint
 import pygame
 
 pygame.init()
+player_count = 2
 
 # CLASSES
 class Player():
@@ -36,6 +37,9 @@ class Player():
         for card in self.hand:
             scores[0]+=card.value[0]
         return scores
+    
+    def reset(self):
+        self.hand = []
 
 
 class Stack:
@@ -205,14 +209,17 @@ deck.shuffle()
 deck.print_deck()
 
 print("\n\n")
-#deck.print_deck()
 
+##### Player Initialization ####
+players = []
+for i in range(player_count):
+    players.append(Player())
 
 #score testing
 #deck.push(Card("Ace", "Spades", [1,11]))
 #deck.push(Card("Ace", "Spades", [1,11]))
 #deck.push(Card("Ace", "Spades", [1,11]))
-
+'''
 print("_"*30)
 print("\nTESTING SCORE MECHANICS")
 print("_"*30)
@@ -228,8 +235,20 @@ for i in range(2):
         print(card.image)
     me.get_score()
     print("NEXT CARD: " + str(deck.peek()))
-
+'''
+step = 0
 while not crashed:
+    # GAME CODE
+    if step == 0:
+        # shuffle deck
+        deck.shuffle()
+        # set 2 cards in each players hand
+        for player in players:
+            hit(player)
+            hit(player)
+
+    # END OF GAME CODE
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
@@ -241,6 +260,7 @@ while not crashed:
 
     pygame.display.update()
     clock.tick(60)
+    step += 1
     
 pygame.quit()
 quit()
