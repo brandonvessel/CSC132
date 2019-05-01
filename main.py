@@ -32,7 +32,7 @@ class Player():
                 trigger=False
         for card in self.hand:
             scores[0]+=card.value[0]
-        print scores
+        return scores
 
 
 class Stack:
@@ -125,11 +125,23 @@ class Card():
 
 
 # FUNCTIONS
-def get_bust_chance():
+def get_bust_chance(hand):
+    #keeps track of the cards that will make you bust
+    bust_cards = 0
+    score = hand.get_score()[0]
+    #counts every card in the deck that will bust you
+    for card in deck.cards:
+        if (score + card.value[0] > 21):
+            bust_cards += 1
+    #calculates bust percentage 
+    chance = float(bust_cards) / Stack.size(deck) * 100
+    print "{}%".format(chance)
+    
+    
 	# Input: list of hand card objects (list)
 	# Output: percentage as integer in form 100 (ex: 80% would be 80)
 	# Purpose: with the current hand, return the lowest bust chance. This makes use of the get_score() function
-    pass
+    
 
 
 def hit(self):
@@ -168,6 +180,7 @@ deck.print_deck()
 
 print("\n\n")
 #deck.print_deck()
+
 
 #score testing
 #deck.push(Card("Ace", "Spades", [1,11]))
