@@ -1,5 +1,8 @@
 import Tkinter#, queue
 from random import randint
+import pygame
+
+pygame.init()
 
 # CLASSES
 class Player():
@@ -166,11 +169,48 @@ def win():
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
     pass
 
-
+def place_card(x, y, image):
+    # Input: x and y coordinates
+    # Output: places a card on the specified location
+    # Purpose: pygame function to place cards on the screen
+    gameDisplay.blit(image, (x,y))
 ############################################
 ################### Main ###################
 ############################################
 
+#pygame setup
+display_width = 800
+display_height = 600
+x = 50
+y = 300
+gameDisplay = pygame.display.set_mode((display_width, display_height))
+pygame.display.set_caption('pygame test')
+
+black = (0,0,0)
+green = (0,255,0)
+
+
+clock = pygame.time.Clock()
+aceImage = pygame.image.load('Ace_Diamonds.png')
+crashed = False
+
+for card in Player.hand:
+    card.image = 
+while not crashed:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            crashed = True
+
+    gameDisplay.fill(green)
+    for card in Player.hand:
+        place_card(x, y, card.image)
+        x += 50
+
+    pygame.display.update()
+    clock.tick(60)
+    
+pygame.quit()
+quit()
 ##### Deck initialization ####
 # Make deck as a stack object
 deck = Stack()
