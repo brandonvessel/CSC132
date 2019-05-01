@@ -67,8 +67,34 @@ class Stack:
 
     
     def shuffle(self):
+        # Input: none
+        # Output: none
+        # Purpose: empties the cards in the deck and creates a new deck
         # Shuffles all the cards in the deck multiple times
-        shuffle_cards()
+
+        # Clear the deck
+        while(True):
+            try:
+                self.pop()
+            except:
+                break
+        
+        # Card info
+        card_suits = ["Spades", "Hearts", "Diamonds", "Clubs"]
+        card_names = ["Jack", "Queen", "King"]
+
+        # Create cards
+        for suit in card_suits:
+            # Ace
+            self.push(Card("Ace", suit, [1,11]))
+
+            # 2 - 11
+            for i in range(2,11):
+                self.push(Card(str(i), suit, [i]))
+
+            # Jack, Queen, King
+            for name in card_names:
+                self.push(Card(name, suit, [10]))
         for j in range(0, 52):
             for i in range(0, len(self.cards) - 1):
                 random_index = randint(0, len(self.cards) - 1)
@@ -86,7 +112,12 @@ class Card():
         self.name = name    # The name of the card
         self.suit = suit    # The suit of the card (Spades, Hearts, Diamonds, Clubs)
         self.value = values # The numerical value of the card (integer)
+        if(self.value[0] == 10 and self.name[0] == "1"):
+            self.image = "sprites/cards/{}{}.png".format("10", suit[0])
+        else:
+            self.image = "sprites/cards/{}{}.png".format(name[0], suit[0])
     
+
     def __str__(self):
         # Ex: "King of Clubs"
         #     "2 of Diamonds"
@@ -99,38 +130,6 @@ def get_bust_chance():
 	# Output: percentage as integer in form 100 (ex: 80% would be 80)
 	# Purpose: with the current hand, return the lowest bust chance. This makes use of the get_score() function
     pass
-
-
-def shuffle_cards():
-	# Input: none
-	# Output: none
-	# Purpose: empties the cards in the deck and creates a new deck
-
-    global deck
-
-    # Clear the deck
-    while(True):
-        try:
-            deck.pop()
-        except:
-            break
-    
-    # Card info
-    card_suits = ["Spades", "Hearts", "Diamonds", "Clubs"]
-    card_names = ["Jack", "Queen", "King"]
-
-    # Create cards
-    for suit in card_suits:
-        # Ace
-        deck.push(Card("Ace", suit, [1,11]))
-
-        # 2 - 11
-        for i in range(2,11):
-            deck.push(Card(str(i), suit, [i]))
-
-        # Jack, Queen, King
-        for name in card_names:
-            deck.push(Card(name, suit, [10]))
 
 
 def hit(self):
@@ -187,5 +186,6 @@ for i in range(2):
     print("Hand:")
     for card in me.hand:
         print(card)
+        print(card.image)
     me.get_score()
     print("NEXT CARD: " + str(deck.peek()))
