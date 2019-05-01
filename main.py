@@ -115,10 +115,12 @@ class Card():
         self.name = name    # The name of the card
         self.suit = suit    # The suit of the card (Spades, Hearts, Diamonds, Clubs)
         self.value = values # The numerical value of the card (integer)
+        self.image = "./sprites/cards/2C.png"
         if(self.value[0] == 10 and self.name[0] == "1"):
-            self.image = "sprites/cards/{}{}.png".format("10", suit[0])
+            self.image = pygame.image.load("./sprites/cards/{}{}.png".format("10", suit[0]))
         else:
-            self.image = "sprites/cards/{}{}.png".format(name[0], suit[0])
+            self.image = pygame.image.load("./sprites/cards/{}{}.png".format(name[0], suit[0]))
+        self.image = pygame.transform.scale(self.image, (229, 349))        
     
 
     def __str__(self):
@@ -193,23 +195,7 @@ clock = pygame.time.Clock()
 aceImage = pygame.image.load('Ace_Diamonds.png')
 crashed = False
 
-for card in Player.hand:
-    card.image = 
-while not crashed:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            crashed = True
 
-    gameDisplay.fill(green)
-    for card in Player.hand:
-        place_card(x, y, card.image)
-        x += 50
-
-    pygame.display.update()
-    clock.tick(60)
-    
-pygame.quit()
-quit()
 ##### Deck initialization ####
 # Make deck as a stack object
 deck = Stack()
@@ -242,3 +228,28 @@ for i in range(2):
         print(card.image)
     me.get_score()
     print("NEXT CARD: " + str(deck.peek()))
+
+cardx = 0
+
+#Pygame execution
+while not crashed:
+    cardx = 0
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            crashed = True
+
+    gameDisplay.fill(green)
+    y = 0
+    for player in players:
+        x = 0
+        for card in me.hand:
+            place_card(cardx, y, card.image)
+            cardx += 50
+        y += 50
+        
+
+    pygame.display.update()
+    clock.tick(60)
+    
+pygame.quit()
+quit()
