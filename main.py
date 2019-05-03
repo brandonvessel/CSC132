@@ -1,17 +1,19 @@
-import Tkinter#, queue
 from random import randint
 import pygame
 
 pygame.init()
-player_count = 2
+# Card values
+card_width, card_height = 139, 212
+
 
 ############################################
 ################# CLASSES ##################
 ############################################
 class Player():
-    def __init__(self):
+    def __init__(self, number):
         # List of cards in hand
         self.hand = []
+        self.number = number
 
 
     def get_score(self):
@@ -43,8 +45,13 @@ class Player():
                 return scores[1]
         return scores[0]
     
+
     def reset(self):
         self.hand = []
+    
+
+    def __str__(self):
+        return str(self.number)
 
 
 class Stack:
@@ -132,7 +139,7 @@ class Card():
             self.image = pygame.image.load("./sprites/cards/{}{}.png".format(name[0], suit[0]))
         
         # Change card size to fit on the screen
-        self.image = pygame.transform.scale(self.image, (229, 349))
+        self.image = pygame.transform.scale(self.image, (card_width, card_height))
 
 
     def __str__(self):
@@ -201,11 +208,13 @@ def hit(self):
 	self.hand.append(deck.pop())
 	
 
+'''
 def lose():
 	# Input: player object
 	# Output: none
 	# Purpose: removes a player from the game, if there is only one player left, win(last player)
     pass
+'''
 
 
 def win():
@@ -235,7 +244,7 @@ def dealer_turn():
 
 
 def place_card(x, y, image):
-    # Input: x and y coordinates
+    # Input: x and y coordinates, path to image
     # Output: places a card on the specified location
     # Purpose: pygame function to place cards on the screen
     gameDisplay.blit(image, (x,y))
@@ -244,13 +253,33 @@ def place_card(x, y, image):
 ############################################
 ############## INITIALIZATION ##############
 ############################################
+##### Player Initialization ####
+players = []
+player_count = 3
+for i in range(player_count):
+    players.append(Player(i+1))
+
+
+##### Deck initialization ####
+# Make deck as a stack object
+deck = Stack()
+
+#shuffle_cards()
+#deck.shuffle()
+#deck.print_deck()
+
+print("\n\n")
+
+
 ##### Pygame Setup #####
-display_width = 800
-display_height = 600
+#display_width = 800
+#display_height = 600
+display_width = card_width * 8
+display_height = card_height * player_count
 x = 50
 y = 300
 gameDisplay = pygame.display.set_mode((display_width, display_height))
-pygame.display.set_caption('pygame test')
+pygame.display.set_caption('Gambling.. But With Math')
 
 black = (0,0,0)
 green = (0,255,0)
@@ -259,52 +288,51 @@ clock = pygame.time.Clock()
 crashed = False
 
 
-##### Deck initialization ####
-# Make deck as a stack object
-deck = Stack()
-
-#shuffle_cards()
-deck.shuffle()
-deck.print_deck()
-
-print("\n\n")
-
-
-##### Player Initialization ####
-players = []
-for i in range(player_count):
-    players.append(Player())
-
-
 ############################################
 ################### Main ###################
 ############################################
 ##### Run Game ####
 step = 0
 while not crashed:
+    # Background
+    gameDisplay.fill(green)
+
     # GAME CODE
     if step == 0:
+        y = 0
         # shuffle deck
         deck.shuffle()
+        print "Deck shuffled"
         # set 2 cards in each players hand
         for player in players:
             hit(player)
             hit(player)
-
+            x = 0
+            for card in player.hand:
+                print "Player: {} Card: {}".format(player, card)
+                place_card(x, y, card.image)
+                x += card_width
+            y += card_height
+        step = 1
+        
+    
+    #print "Waiting for player input"
+    y = 0
+    for player in players:
+        x = 0
+        for card in player.hand:
+            place_card(x, y, card.image)
+            x += card_width
+        y += card_height
+    #print step
     # END OF GAME CODE
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
 
-    gameDisplay.fill(green)
-    for card in me.hand:
-        place_card(x, y, card.image)
-        #x += 50
-
     pygame.display.update()
     clock.tick(60)
-    step += 1
     
 pygame.quit()
 quit()

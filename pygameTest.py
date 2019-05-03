@@ -15,15 +15,16 @@ white = (0,255,0)
 
 clock = pygame.time.Clock()
 crashed = False
-carImg = pygame.image.load('Ace_Diamonds.png')
+carImg = pygame.image.load('./sprites/cards/2C.png')
+carImg = pygame.transform.scale(carImg, (139, 212))
 
 def car(x,y):
     gameDisplay.blit(carImg, (x,y))
 
 #x =  (display_width * 0.45)
 #y = (display_height * 0.5)
-x = 50
-y = 300
+x = 0
+y = 0
 
 
 while not crashed:
