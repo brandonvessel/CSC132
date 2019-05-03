@@ -179,13 +179,14 @@ def get_bust_chance(hand):
 	# Output: percentage as integer in form 100 (ex: 80% would be 80)
 	# Purpose: with the current hand, return the lowest bust chance. This makes use of the get_score() function
     
-    #keeps track of the cards that will make you bust
+    ##keeps track of the cards that will make you bust
     bust_cards = 0
-    score = hand.get_score()[0]
     #counts every card in the deck that will bust you
     for card in deck.cards:
-        if (score + card.value[0] > 21):
+        hand.append(card)
+        if (get_score(hand) > 21):
             bust_cards += 1
+        hand.pop(len(hand)-1)
     #calculates bust percentage 
     chance = float(bust_cards) / Stack.size(deck) * 100
     print "Bust Chance: {}%".format(chance)
