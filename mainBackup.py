@@ -1,58 +1,16 @@
+import Tkinter#, queue
 from random import randint
 import pygame
 
 pygame.init()
-# Card values
-card_width, card_height = 139, 212
 
-
-############################################
-################# CLASSES ##################
-############################################
+# CLASSES
 class Player():
-    def __init__(self, number):
+    def __init__(self):
         # List of cards in hand
         self.hand = []
-        self.number = number
 
-
-    def get_score(self):
-        # Input: a player's hand as a list
-        # Output: possible scores as list of integers
-        # Purpose: parse the list of card objects and return their values
         
-        scores=[0]
-        hasAce=False
-        aceAdded=False
-
-        # Iterate through cards, look for Ace
-        for card in self.hand:
-                if(card.name=="Ace"):
-                    scores.append(0)
-                    hasAce=True
-
-        if(hasAce):
-            for card in self.hand:
-                if(card.name=="Ace" and not(aceAdded)): # Only adds an extra score possiblity for 1 ace
-                    scores[1]+=card.value[1]
-                    aceAdded=True
-                else:
-                    scores[1]+=card.value[0]
-        for card in self.hand:
-            scores[0]+=card.value[0]
-        if(hasAce):
-            if(scores[1]<=21):
-                return scores[1]
-        return scores[0]
-    
-
-    def reset(self):
-        self.hand = []
-    
-
-    def __str__(self):
-        return str(self.number)
-
 
 class Stack:
     def __init__(self):
@@ -119,7 +77,6 @@ class Stack:
                 random_index = randint(0, len(self.cards) - 1)
                 self.cards[i], self.cards[random_index] = self.cards[random_index], self.cards[i]
 
-
     def print_deck(self):
         # Prints all the cards in the deck to the terminal
         for card in self.cards:
@@ -131,7 +88,6 @@ class Card():
         self.name = name    # The name of the card
         self.suit = suit    # The suit of the card (Spades, Hearts, Diamonds, Clubs)
         self.value = values # The numerical value of the card (integer)
-        self.image = "./sprites/cards/2C.png"
         if(self.value[0] == 10 and self.name[0] == "1"):
             # Special case for the 10 because it is weird
             self.image = pygame.image.load("./sprites/cards/{}{}.png".format("10", suit[0]))
@@ -140,7 +96,7 @@ class Card():
             self.image = pygame.image.load("./sprites/cards/{}{}.png".format(name[0], suit[0]))
         
         # Change card size to fit on the screen
-        self.image = pygame.transform.scale(self.image, (card_width, card_height))
+        self.image = pygame.transform.scale(self.image, (229, 349))
 
 
     def __str__(self):
@@ -149,14 +105,12 @@ class Card():
         return "{} of {}".format(self.name, self.suit)
 
 
-############################################
-################ FUNCTIONS #################
-############################################
+# FUNCTIONS
 def get_score(hand):
     # Input: a player's hand as a list
     # Output: most reasonable score
     # Purpose: parse the list of card objects and return the most reasonable value
-    # Different from player class. This one only needs a hand, not player object
+    
     scores=[0]
     hasAce=False
     aceAdded=False
@@ -181,13 +135,9 @@ def get_score(hand):
             return scores[1]
     return scores[0]
 
-    
+
 def get_bust_chance(hand):
-    # Input: list of hand card objects (list)
-	# Output: percentage as integer in form 100 (ex: 80% would be 80)
-	# Purpose: with the current hand, return the lowest bust chance. This makes use of the get_score() function
-    
-    ##keeps track of the cards that will make you bust
+    #keeps track of the cards that will make you bust
     bust_cards = 0
     #counts every card in the deck that will bust you
     for card in deck.cards:
@@ -197,34 +147,37 @@ def get_bust_chance(hand):
         hand.pop(len(hand)-1)
     #calculates bust percentage 
     chance = float(bust_cards) / Stack.size(deck) * 100
-    print "Bust Chance: {}%".format(chance)
+    print "{}%".format(chance)
     return chance
+    
+    
+	# Input: list of hand card objects (list)
+	# Output: percentage as integer in form 100 (ex: 80% would be 80)
+	# Purpose: with the current hand, return the lowest bust chance. This makes use of the get_score() function
+    
+
+
 
 
 def hit(self):
 	# Input: player object
 	# Output: none
 	# Purpose: takes the player's hand and adds a card to it. Detects a win/lose scenario and reacts accordingly.
-
 	self.hand.append(deck.pop())
 	
 
-'''
-def lose():
+def lose(self):
 	# Input: player object
 	# Output: none
 	# Purpose: removes a player from the game, if there is only one player left, win(last player)
     pass
-'''
 
 
-def win():
+def win(self):
 	# Input: player object
 	# Output: none
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
     pass
-
-
 def dealer_turn():
         # Input: none
         # Output: none
@@ -242,45 +195,23 @@ def dealer_turn():
                 print "losing so hit"
                 hit(dealer)
                 print "score after: {}".format(get_score(dealer.hand))
-
-
+        
 def place_card(x, y, image):
-    # Input: x and y coordinates, path to image
+    # Input: x and y coordinates
     # Output: places a card on the specified location
     # Purpose: pygame function to place cards on the screen
     gameDisplay.blit(image, (x,y))
-
-
 ############################################
-############## INITIALIZATION ##############
+################### Main ###################
 ############################################
-##### Player Initialization ####
-players = []
-player_count = 3
-for i in range(player_count):
-    players.append(Player(i+1))
-
-
-##### Deck initialization ####
-# Make deck as a stack object
-deck = Stack()
-
-#shuffle_cards()
-#deck.shuffle()
-#deck.print_deck()
-
-print("\n\n")
-
 
 ##### Pygame Setup #####
-#display_width = 800
-#display_height = 600
-display_width = card_width * 8
-display_height = card_height * player_count
+display_width = 800
+display_height = 600
 x = 50
 y = 300
 gameDisplay = pygame.display.set_mode((display_width, display_height))
-pygame.display.set_caption('Gambling.. But With Math')
+pygame.display.set_caption('pygame test')
 
 black = (0,0,0)
 green = (0,255,0)
@@ -288,49 +219,48 @@ green = (0,255,0)
 clock = pygame.time.Clock()
 crashed = False
 
+##### Deck initialization ####
+# Make deck as a stack object
+deck = Stack()
 
-############################################
-################### Main ###################
-############################################
-##### Run Game ####
-step = 0
+#shuffle_cards()
+deck.shuffle()
+deck.print_deck()
+
+print("\n\n")
+#deck.print_deck()
+
+
+#score testing
+#deck.push(Card("Ace", "Spades", [1,11]))
+#deck.push(Card("Ace", "Spades", [1,11]))
+#deck.push(Card("Ace", "Spades", [1,11]))
+
+print("_"*30)
+print("\nTESTING SCORE MECHANICS")
+print("_"*30)
+
+me = Player()
+print("NEXT CARD: " + str(deck.peek()))
+for i in range(2):
+    hit(me)
+    print("_"*30)
+    print("Hand:")
+    for card in me.hand:
+        print(card)
+        print(card.image)
+    me.get_score()
+    print("NEXT CARD: " + str(deck.peek()))
+
 while not crashed:
-    # Background
-    gameDisplay.fill(green)
-
-    # GAME CODE
-    if step == 0:
-        y = 0
-        # shuffle deck
-        deck.shuffle()
-        print "Deck shuffled"
-        # set 2 cards in each players hand
-        for player in players:
-            hit(player)
-            hit(player)
-            x = 0
-            for card in player.hand:
-                print "Player: {} Card: {}".format(player, card)
-                place_card(x, y, card.image)
-                x += card_width
-            y += card_height
-        step = 1
-        
-    
-    #print "Waiting for player input"
-    y = 0
-    for player in players:
-        x = 0
-        for card in player.hand:
-            place_card(x, y, card.image)
-            x += card_width
-        y += card_height
-    #print step
-    # END OF GAME CODE
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
+
+    gameDisplay.fill(green)
+    for card in me.hand:
+        place_card(x, y, card.image)
+        #x += 50
 
     pygame.display.update()
     clock.tick(60)
