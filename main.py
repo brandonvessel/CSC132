@@ -5,7 +5,9 @@ import pygame
 pygame.init()
 player_count = 2
 
-# CLASSES
+############################################
+################# CLASSES ##################
+############################################
 class Player():
     def __init__(self):
         # List of cards in hand
@@ -19,24 +21,27 @@ class Player():
         
         scores=[0]
         hasAce=False
-        trigger=True
+        aceAdded=False
 
         # Iterate through cards, look for Ace
         for card in self.hand:
                 if(card.name=="Ace"):
+                    scores.append(0)
                     hasAce=True
 
         if(hasAce):
-            scores.append(0)
             for card in self.hand:
-                if(card.name=="Ace" and trigger):
+                if(card.name=="Ace" and not(aceAdded)): # Only adds an extra score possiblity for 1 ace
                     scores[1]+=card.value[1]
+                    aceAdded=True
                 else:
                     scores[1]+=card.value[0]
-                trigger=False
         for card in self.hand:
             scores[0]+=card.value[0]
-        return scores
+        if(hasAce):
+            if(scores[1]<=21):
+                return scores[1]
+        return scores[0]
     
     def reset(self):
         self.hand = []
@@ -136,8 +141,44 @@ class Card():
         return "{} of {}".format(self.name, self.suit)
 
 
-# FUNCTIONS
+############################################
+################ FUNCTIONS #################
+############################################
+def get_score(hand):
+    # Input: a player's hand as a list
+    # Output: most reasonable score
+    # Purpose: parse the list of card objects and return the most reasonable value
+    # Different from player class. This one only needs a hand, not player object
+    scores=[0]
+    hasAce=False
+    aceAdded=False
+
+    # Iterate through cards, look for Ace
+    for card in hand:
+            if(card.name=="Ace"):
+                scores.append(0)
+                hasAce=True
+
+    if(hasAce):
+        for card in hand:
+            if(card.name=="Ace" and not(aceAdded)): # Only adds an extra score possiblity for 1 ace
+                scores[1]+=card.value[1]
+                aceAdded=True
+            else:
+                scores[1]+=card.value[0]
+    for card in hand:
+        scores[0]+=card.value[0]
+    if(hasAce):
+        if(scores[1]<=21):
+            return scores[1]
+    return scores[0]
+
+    
 def get_bust_chance(hand):
+    # Input: list of hand card objects (list)
+	# Output: percentage as integer in form 100 (ex: 80% would be 80)
+	# Purpose: with the current hand, return the lowest bust chance. This makes use of the get_score() function
+    
     #keeps track of the cards that will make you bust
     bust_cards = 0
     score = hand.get_score()[0]
@@ -147,13 +188,8 @@ def get_bust_chance(hand):
             bust_cards += 1
     #calculates bust percentage 
     chance = float(bust_cards) / Stack.size(deck) * 100
-    print "{}%".format(chance)
-    
-    
-	# Input: list of hand card objects (list)
-	# Output: percentage as integer in form 100 (ex: 80% would be 80)
-	# Purpose: with the current hand, return the lowest bust chance. This makes use of the get_score() function
-    
+    print "Bust Chance: {}%".format(chance)
+    return chance
 
 
 def hit(self):
@@ -177,15 +213,36 @@ def win():
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
     pass
 
+
+def dealer_turn():
+        # Input: none
+        # Output: none
+        # Purpose: simulates the dealer's turn based on the dealer's and player's cards
+        # note: dealer will always hit if the player has a higher score and sometimes hit when tied
+        while(get_score(dealer.hand)<= get_score(player.hand) and get_score(dealer.hand)!=21):
+            if(get_score(dealer.hand)==get_score(player.hand)):
+                if(get_bust_chance(dealer.hand)<50):
+                    print "tied but hit"
+                    hit(dealer)
+                else:
+                    return
+            else:
+                print "score before: {}".format(get_score(dealer.hand))
+                print "losing so hit"
+                hit(dealer)
+                print "score after: {}".format(get_score(dealer.hand))
+
+
 def place_card(x, y, image):
     # Input: x and y coordinates
     # Output: places a card on the specified location
     # Purpose: pygame function to place cards on the screen
     gameDisplay.blit(image, (x,y))
-############################################
-################### Main ###################
-############################################
 
+
+############################################
+############## INITIALIZATION ##############
+############################################
 ##### Pygame Setup #####
 display_width = 800
 display_height = 600
@@ -200,6 +257,7 @@ green = (0,255,0)
 clock = pygame.time.Clock()
 crashed = False
 
+
 ##### Deck initialization ####
 # Make deck as a stack object
 deck = Stack()
@@ -210,32 +268,17 @@ deck.print_deck()
 
 print("\n\n")
 
+
 ##### Player Initialization ####
 players = []
 for i in range(player_count):
     players.append(Player())
 
-#score testing
-#deck.push(Card("Ace", "Spades", [1,11]))
-#deck.push(Card("Ace", "Spades", [1,11]))
-#deck.push(Card("Ace", "Spades", [1,11]))
-'''
-print("_"*30)
-print("\nTESTING SCORE MECHANICS")
-print("_"*30)
 
-me = Player()
-print("NEXT CARD: " + str(deck.peek()))
-for i in range(2):
-    hit(me)
-    print("_"*30)
-    print("Hand:")
-    for card in me.hand:
-        print(card)
-        print(card.image)
-    me.get_score()
-    print("NEXT CARD: " + str(deck.peek()))
-'''
+############################################
+################### Main ###################
+############################################
+##### Run Game ####
 step = 0
 while not crashed:
     # GAME CODE
