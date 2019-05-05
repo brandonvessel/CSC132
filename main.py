@@ -1,6 +1,6 @@
 from random import randint
 import pygame
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 
 
 pygame.init()
@@ -220,11 +220,23 @@ def lose():
 '''
 
 
-def win():
+def win(player):
 	# Input: player object
 	# Output: none
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
-    pass
+    global deck
+    x = 0
+    y = 0
+    while (y < display_height):
+        place_card(x, y, deck.cards[randint(0, len(deck.cards)-1)].image)
+        place_card(x + card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
+        place_card(display_width - card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
+        place_card(display_width - card_width*2, y, deck.cards[randint(0, len(deck.cards)-1)].image)
+        y += 50
+    #victoryImage = pygame.image.load("winnerTest.png")
+    #place_card(display_width/2, card_height*2, victoryImage)
+    place_text("Winner", display_width/2-50, display_height/2-50)
+    print ("{} is the winner".format(player.number))
 
 
 def dealer_turn():
@@ -250,7 +262,15 @@ def place_card(x, y, image):
     # Input: x and y coordinates, path to image
     # Output: places a card on the specified location
     # Purpose: pygame function to place cards on the screen
-    gameDisplay.blit(image, (x,y))
+        gameDisplay.blit(image, (x,y))
+        
+
+def place_text(text, x, y):
+    pygame.font.init()
+    myfont = pygame.font.SysFont('Comic Sans MS', 30)
+
+    textsurface = myfont.render(text, False, (0,0,0))
+    gameDisplay.blit(textsurface,(x,y))
 
 
 ############################################
@@ -285,7 +305,7 @@ gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Gambling.. But With Math')
 
 black = (0,0,0)
-green = (0,255,0)
+green = (0,100,0)
 
 clock = pygame.time.Clock()
 crashed = False
@@ -293,25 +313,26 @@ crashed = False
 
 ###########################################
 ###############GPIO setup##################
-buttons = [17, 16, 13]
-RGB_LED = [18, 19, 20]
+#buttons = [17, 16, 13]
+#RGB_LED = [18, 19, 20]
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(RGB_LED, GPIO.OUT)
-GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+#GPIO.setmode(GPIO.BCM)
+#GPIO.setup(RGB_LED, GPIO.OUT)
+#GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 ############################################
 ################### Main ###################
 ############################################
 ##### Run Game ####
-step = "initialization"
+step = 0
 while not crashed:
     # Background
     gameDisplay.fill(green)
 
     # GAME CODE
-    if step == "initialization":
-        # Initialization
+    if step == 0:
+        player_turn = 0
+        y = 0
         # shuffle deck
         deck.shuffle()
         print "Deck shuffled"
@@ -319,28 +340,26 @@ while not crashed:
         for player in players:
             hit(player)
             hit(player)
+            x = 0
             for card in player.hand:
                 print "Player: {} Card: {}".format(player, card)
-        step = "player_input"
+                place_card(x, y, card.image)
+                x += card_width
+            y += card_height
+        step = 1
         
-    if step == "player_input":
-        # Get player input
-        pass
-        
-    print "Waiting for player input"
     
     #print "Waiting for player input"
-    if step == 1:
-        player = players[player_turn]
-        if (GPIO.input(buttons[0] == GPIO.HIGH)):
-            hit(player)
-            if (get_score(player) > 21):
-                player_turn += 1
-        if (GPIO.input(buttons[1] == GPIO.HIGH)):
-            player_turn += 1
-            dealer_turn()
-        if (GPIO.input(buttons[2] == GPIO.HIGH)):
-            get_bust_chance(player.hand)
+    #if step == 1:
+     #   player = players[player_turn]
+      #     hit(player)
+        #    if (get_score(player) > 21):
+         #       player_turn += 1
+        #if (GPIO.input(buttons[1] == GPIO.HIGH)):
+         #   player_turn += 1
+          #  dealer_turn()
+       # if (GPIO.input(buttons[2] == GPIO.HIGH)):
+        #    get_bust_chance(player.hand)
                 
     y = 0
     for player in players:
@@ -349,14 +368,18 @@ while not crashed:
             place_card(x, y, card.image)
             x += card_width
         y += card_height
+    #print step
+    # END OF GAME CODE
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
-
+            
+    win(player)
+    #place_text()
     pygame.display.update()
     clock.tick(60)
-
-
+    
+    
 pygame.quit()
 quit()
