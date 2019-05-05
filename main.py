@@ -6,9 +6,9 @@ import pygame
 pygame.init()
 
 # Card values
-card_width, card_height = 139, 212
+card_width, card_height = 70, 106
 card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
-card_back = "./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_back)-1)])
+card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_back)-1)]))
 
 
 ############################################
