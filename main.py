@@ -404,13 +404,16 @@ crashed = False
 ###########################################
 buttons = [17, 16, 13]
 
-RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
+RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
+
 RGB1 = RGB(18,19,20)
 RGB2 = RGB(21,22,23)
 RGB3 = RGB(24,25,26)
 
+RGB_LEDS = [RGB1, RGB2, RGB3]
+
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(RGB_LED, GPIO.OUT)
+GPIO.setup(RGB_LED_INDICES, GPIO.OUT)
 GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 
@@ -451,7 +454,8 @@ while not crashed:
         
         #### Player Input ####
         player = players[player_turn]
-
+        led = RGB_LEDS[player_turn]
+        
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
             player_turn += 1
