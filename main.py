@@ -1,6 +1,7 @@
 from random import randint
 import pygame
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
+from time import sleep
 
 # Initialize pygame
 pygame.init()
@@ -467,6 +468,6 @@ while not crashed:
     pygame.display.update()
     clock.tick(60)
     
-    
+GPIO.cleanup()
 pygame.quit()
 quit()
