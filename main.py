@@ -289,8 +289,6 @@ display_width = card_width * 8
 display_height = card_height * player_count
 room_width = display_width      # just in case we decide to use these names later
 room_height = display_height    # just in case we decide to use these names later
-x = 50
-y = 300
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Gambling.. But With Math')
 
@@ -340,14 +338,15 @@ while not crashed:
     #print "Waiting for player input"
     if step == "player_input":
         player = players[player_turn]
-        if (GPIO.input(buttons[0] == GPIO.HIGH)):
+        if (GPIO.input(buttons[0]) == GPIO.HIGH):
             hit(player)
-            if (get_score(player) > 21):
+            sleep(1)
+            if (get_score(player) >= 21):
                 player_turn += 1
-        if (GPIO.input(buttons[1] == GPIO.HIGH)):
+        if (GPIO.input(buttons[1]) == GPIO.HIGH):
             player_turn += 1
             dealer_turn()
-        if (GPIO.input(buttons[2] == GPIO.HIGH)):
+        if (GPIO.input(buttons[2]) == GPIO.HIGH):
             get_bust_chance(player.hand)
                 
 
