@@ -233,7 +233,7 @@ def lose():
 '''
 
 
-def win(player):
+def win(winners[]):
 	# Input: player object
 	# Output: none
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
@@ -241,15 +241,15 @@ def win(player):
     x = 0
     y = 0
     while (y < display_height):
-        print len(deck.cards)
+        #print len(deck.cards)
+        #makes a card waterfall
         place_card(x, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(x + card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(display_width - card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(display_width - card_width*2, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         y += 50
-    #victoryImage = pygame.image.load("winnerTest.png")
-    #place_card(display_width/2, card_height*2, victoryImage)
-    place_text("Winner", display_width/2-50, display_height/2-50)
+    for winner in winners:
+    place_text("{} is a winner\n".format(winners[winner], display_width/2-50, display_height/2-50)
     print ("{} is the winner".format(player.number))
 
 
