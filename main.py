@@ -235,24 +235,57 @@ def win():
     pass
 
 
-def dealer_turn(player_list):
-        # Input: none
-        # Output: none
-        # Purpose: simulates the dealer's turn based on the dealer's and player's cards
-        # note: dealer will always hit if the player has a higher score and sometimes hit when tied
-        global dealer
-        while(get_score(dealer.hand) <= get_score(player.hand) and get_score(dealer.hand)!=21):
-            if(get_score(dealer.hand) == get_score(player.hand)):
-                if(get_bust_chance(dealer.hand) < 50):
-                    print "tied but hit"
-                    hit(dealer)
-                else:
-                    return
-            else:
-                print "score before: {}".format(get_score(dealer.hand))
-                print "losing so hit"
+def dealer_turn():
+    # Input: none
+    # Output: none
+    # Purpose: simulates the dealer's turn based on the dealer's and player's cards
+    # note: dealer will always hit if the player has a higher score and sometimes hit when tied
+    global dealer
+    global players
+
+    # dealer only has 1 card, hit
+    hit(dealer)
+    # find highest scoring player
+    highest = 0
+    highest_player = None
+
+    # determine if any players have valid hands
+    valid = 0
+    for player in players:
+        if(player.score < 21):
+            valid += 1
+
+    if(valid == 0):
+        print "All players busted, dealer wins!"
+        return
+
+    # iterate through players
+    for player in players:
+        # if player did not bust and has a higher score than the lowest
+        if((player.score < 22) and (player.score > highest.score)):
+            highest_player = player
+            highest = player.score
+    
+    player = highest_player
+    
+
+    while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
+        if(get_score(dealer.hand) == get_score(player.hand)):
+            if(get_bust_chance(dealer.hand) < 50):
+                print "tied but hit"
                 hit(dealer)
-                print "score after: {}".format(get_score(dealer.hand))
+            else:
+                break
+        else:
+            print "score before: {}".format(get_score(dealer.hand))
+            print "losing so hit"
+            hit(dealer)
+            print "score after: {}".format(get_score(dealer.hand))
+    
+    if(dealer.score > highest and dealer.score < 22):
+        return "Dealer wins!"
+    else:
+        return "Player {} wins!".format(highest_player)
 
 
 def place_card(x, y, image):
@@ -323,6 +356,7 @@ while not crashed:
         #### Initialization ####
         # beginning variables
         player_turn = 0
+        winner = ""
         # shuffle deck
         deck.shuffle()
         print "Deck shuffled"
@@ -332,6 +366,9 @@ while not crashed:
             hit(player)
             for card in player.hand:
                 print "Player: {} Card: {}".format(player, card)
+        
+        # dealer "only gets 1 card." 1 card is added during the dealer's turn
+        hit(dealer)
         step = "player_input"
 
 
@@ -345,7 +382,10 @@ while not crashed:
                 player_turn += 1
         if (GPIO.input(buttons[1]) == GPIO.HIGH):
             player_turn += 1
-            dealer_turn()
+            if(player_turn == len(players)-1):
+                # winner is the return value of dealer_turn()
+                winner = dealer_turn()
+                step = "final"
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
             get_bust_chance(player.hand)
                 
