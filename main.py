@@ -190,8 +190,10 @@ def get_score(hand):
                 scores[1]+=card.value[0]
     for card in hand:
         scores[0]+=card.value[0]
+    #print scores
     if(hasAce):
         if(scores[1]<=21):
+            #print scores[1]
             return scores[1]
     return scores[0]
 
@@ -268,19 +270,19 @@ def dealer_turn():
     # determine if any players have valid hands
     valid = 0
     for player in players:
-        if(player.score < 21):
+        if(get_score(player.hand) < 21):
             valid += 1
 
     if(valid == 0):
-        print "All players busted, dealer wins!"
-        return
+        #print "All players busted, dealer wins!"
+        return "All players busted, dealer wins!"
 
     # iterate through players
     for player in players:
         # if player did not bust and has a higher score than the lowest
-        if((player.score < 22) and (player.score > highest.score)):
+        if((get_score(player.hand) < 22) and (get_score(player.hand) > highest)):
             highest_player = player
-            highest = player.score
+            highest = get_score(player.hand)
     
     player = highest_player
     
@@ -298,7 +300,7 @@ def dealer_turn():
             hit(dealer)
             print "score after: {}".format(get_score(dealer.hand))
     
-    if(dealer.score > highest and dealer.score < 22):
+    if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
         return "Dealer wins!"
     else:
         return "Player {} wins!".format(highest_player)
@@ -366,9 +368,9 @@ crashed = False
 buttons = [17, 16, 13]
 RGB_LED = [18, 19, 20]
 
-#GPIO.setmode(GPIO.BCM)
-#GPIO.setup(RGB_LED, GPIO.OUT)
-#GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(RGB_LED, GPIO.OUT)
+GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 
 ############################################
@@ -408,6 +410,10 @@ while not crashed:
         #### Player Input ####
         player = players[player_turn]
 
+        if (get_score(player.hand) == 21):
+            print ("Blackjack! Next player")
+            player_turn += 1
+
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
@@ -415,21 +421,25 @@ while not crashed:
             sleep(1)
 
             # change the player turn if the player busted
-            if (get_score(player.hand) >= 21):
+            if (get_score(player.hand) > 21):
                 print("Player {} BUSTED!\n Next player".format(player))
                 player_turn += 1
+
+            
         
         ## STAY ##
         if (GPIO.input(buttons[1]) == GPIO.HIGH):
             print("Player {} stayed".format(player))
             player_turn += 1
+            sleep(1)
             
         ## GET BUST CHANCE ##
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
             chance = get_bust_chance(player.hand)
+            place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
         
         # Determing if all players have gone and move forward.
-        if(player_turn == len(players)-1):
+        if(player_turn == len(players)):
                 print("All players have gone.\nIt's the dealer's turn")
                 step = "dealer_turn"
 
@@ -474,6 +484,8 @@ while not crashed:
 
     #place_text()
     # main pygame display commands. must run at the end of each frame
+    #chance = get_bust_chance(player.hand)
+    #place_text(str(chance), display_width/2, display_height/2)
     pygame.display.update()
     clock.tick(60)
     
