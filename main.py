@@ -163,6 +163,29 @@ class Dealer(Player):
         return "Dealer"
 
 
+class RGB():
+    def __init__(self, R, G, B):
+        self.r = R      # Red pin
+        self.g = G      # Green pin
+        self.b = B      # Blue pin
+    
+    def red(self):
+        # Turn on red pin. Turn off other pins.
+        pass
+    
+    def green(self):
+        # Turn on green pin. Turn off other pins.
+        pass
+    
+    def blue(self):
+        # Turn on blue pin, Turn off other pins.
+        pass
+
+    def off(self):
+        # Turn off all pins.
+        pass
+
+
 ############################################
 ################ FUNCTIONS #################
 ############################################
@@ -233,7 +256,7 @@ def lose():
 '''
 
 
-def win(player):
+def win(winners[]):
 	# Input: player object
 	# Output: none
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
@@ -241,15 +264,15 @@ def win(player):
     x = 0
     y = 0
     while (y < display_height):
-        print len(deck.cards)
+        #print len(deck.cards)
+        #makes a card waterfall
         place_card(x, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(x + card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(display_width - card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(display_width - card_width*2, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         y += 50
-    #victoryImage = pygame.image.load("winnerTest.png")
-    #place_card(display_width/2, card_height*2, victoryImage)
-    place_text("Winner", display_width/2-50, display_height/2-50)
+    for winner in winners:
+    place_text("{} is a winner\n".format(winners[winner], display_width/2-50, display_height/2-50)
     print ("{} is the winner".format(player.number))
 
 
@@ -274,8 +297,7 @@ def dealer_turn():
             valid += 1
 
     if(valid == 0):
-        #print "All players busted, dealer wins!"
-        return "All players busted, dealer wins!"
+        return "All players busted, dealer wins!", []
 
     # iterate through players
     for player in players:
@@ -301,9 +323,16 @@ def dealer_turn():
             print "score after: {}".format(get_score(dealer.hand))
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
-        return "Dealer wins!"
+        return "Dealer wins!", []
     else:
-        return "Player {} wins!".format(highest_player)
+        score = 0
+        statement = ""
+        winners = []
+        for player in players:
+            if(get_score(player.hand) < 22 and get_score(player.hand) > score):
+                statement = statement + "Player {} wins!\n".format(player)
+                winners.append(repr(player))
+        return statement, winners
 
 
 def place_card(x, y, image):
@@ -445,8 +474,6 @@ while not crashed:
             if (get_score(player.hand) > 21):
                 print("Player {} BUSTED!\n Next player".format(player))
                 player_turn += 1
-
-            
         
         ## STAY ##
         if (GPIO.input(buttons[1]) == GPIO.HIGH):
@@ -467,7 +494,7 @@ while not crashed:
     #### Dealer Turn ####
     if step == "dealer_turn":
         # winner is the return value of dealer_turn()
-        winner = dealer_turn()
+        winner, winners = dealer_turn()
         print("\n\n" + winner)
         step = "end"
 
