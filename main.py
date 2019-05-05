@@ -7,12 +7,14 @@ pygame.init()
 
 # Card values
 card_width, card_height = 139, 212
+card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
+card_back = "./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_back)-1)])
 
 
 ############################################
 ################# CLASSES ##################
 ############################################
-class Player(Object):
+class Player(object):
     def __init__(self, number):
         # List of cards in hand
         self.hand = []
@@ -383,13 +385,15 @@ while not crashed:
         if (GPIO.input(buttons[1]) == GPIO.HIGH):
             player_turn += 1
             if(player_turn == len(players)-1):
-                # winner is the return value of dealer_turn()
-                winner = dealer_turn()
-                step = "final"
+                step = "dealer_turn"
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
             get_bust_chance(player.hand)
-                
+    
+    if step == "dealer_turn":
+        # winner is the return value of dealer_turn()
+        winner = dealer_turn()
 
+    # print player cards
     y = 0
     for player in players:
         x = 0
@@ -397,6 +401,13 @@ while not crashed:
             place_card(x, y, card.image)
             x += card_width
         y += card_height
+
+    # print dealer cards
+    x = 0
+    for card in dealer.hand:
+        place_card(x, y, card.image)
+        place_card(x + card_width, y, card_back)
+    
 
 
     for event in pygame.event.get():
