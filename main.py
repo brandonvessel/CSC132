@@ -171,20 +171,27 @@ class RGB():
     
     def red(self):
         # Turn on red pin. Turn off other pins.
-        pass
+        GPIO.output(R,True)
+        GPIO.output(G,False)
+        GPIO.output(B,False)
     
     def green(self):
         # Turn on green pin. Turn off other pins.
-        pass
+        GPIO.output(R,False)
+        GPIO.output(G,True)
+        GPIO.output(B,False)
     
     def blue(self):
         # Turn on blue pin, Turn off other pins.
-        pass
+        GPIO.output(R,False)
+        GPIO.output(G,False)
+        GPIO.output(B,True)
 
     def off(self):
         # Turn off all pins.
-        pass
-
+        GPIO.output(R,False)
+        GPIO.output(G,False)
+        GPIO.output(B,False)
 
 ############################################
 ################ FUNCTIONS #################
@@ -349,26 +356,7 @@ def place_text(text, x, y):
     textsurface = myfont.render(text, False, (0,0,0))
     gameDisplay.blit(textsurface,(x,y))
 
-# RGB LED functions
-def rgb_red():
-    GPIO.output(RGB_LED[1],False)
-    GPIO.output(RGB_LED[2],False)
-    GPIO.output(RGB_LED[0],True)
 
-def rgb_green():
-    GPIO.output(RGB_LED[0],False)
-    GPIO.output(RGB_LED[2],False)
-    GPIO.output(RGB_LED[1],True)
-
-def rgb_blue():
-    GPIO.output(RGB_LED[0],False)
-    GPIO.output(RGB_LED[1],False)
-    GPIO.output(RGB_LED[2],True)
-
-def rgb_off():
-    GPIO.output(RGB_LED[0],False)
-    GPIO.output(RGB_LED[1],False)
-    GPIO.output(RGB_LED[2],False)
 
 ############################################
 ############## INITIALIZATION ##############
