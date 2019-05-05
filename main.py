@@ -183,8 +183,7 @@ class RGB():
     
     def blue(self):
         # Turn on blue pin, Turn off other pins.
-        GPIO.output(R,False)
-        GPIO.output(G,False)
+        GPIO.output(R,False)        GPIO.output(G,False)
         GPIO.output(B,True)
 
     def off(self):
@@ -279,7 +278,7 @@ def win(winners[]):
         place_card(display_width - card_width*2, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         y += 50
     for winner in winners:
-    place_text("{} is a winner\n".format(winners[winner], display_width/2-50, display_height/2-50)
+    place_text("{} is a winner\n".format(winners[winner], display_width/2-50, display_height/2-50))
     print ("{} is the winner".format(player.number))
 
 
@@ -403,7 +402,11 @@ crashed = False
 ###############GPIO setup##################
 ###########################################
 buttons = [17, 16, 13]
-RGB_LED = [18, 19, 20]
+
+RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
+RGB1 = RGB(18,19,20)
+RGB2 = RGB(21,22,23)
+RGB3 = RGB(24,25,26)
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(RGB_LED, GPIO.OUT)
