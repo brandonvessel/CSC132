@@ -274,8 +274,7 @@ def dealer_turn():
             valid += 1
 
     if(valid == 0):
-        #print "All players busted, dealer wins!"
-        return "All players busted, dealer wins!"
+        return "All players busted, dealer wins!", []
 
     # iterate through players
     for player in players:
@@ -301,9 +300,16 @@ def dealer_turn():
             print "score after: {}".format(get_score(dealer.hand))
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
-        return "Dealer wins!"
+        return "Dealer wins!", []
     else:
-        return "Player {} wins!".format(highest_player)
+        score = 0
+        statement = ""
+        winners = []
+        for player in players:
+            if(get_score(player.hand) < 22 and get_score(player.hand) > score):
+                statement = statement + "Player {} wins!\n".format(player)
+                winners.append(repr(player))
+        return statement, winners
 
 
 def place_card(x, y, image):
@@ -424,8 +430,6 @@ while not crashed:
             if (get_score(player.hand) > 21):
                 print("Player {} BUSTED!\n Next player".format(player))
                 player_turn += 1
-
-            
         
         ## STAY ##
         if (GPIO.input(buttons[1]) == GPIO.HIGH):
@@ -446,7 +450,7 @@ while not crashed:
     #### Dealer Turn ####
     if step == "dealer_turn":
         # winner is the return value of dealer_turn()
-        winner = dealer_turn()
+        winner, winners = dealer_turn()
         print("\n\n" + winner)
         step = "end"
 
