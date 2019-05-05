@@ -376,8 +376,10 @@ while not crashed:
     # Background. Must run at the beginning of each frame.
     gameDisplay.fill(green)
 
+    ###################
+    #### GAME CODE ####
+    ###################
 
-    # GAME CODE
     if step == "initialization":
         #### Initialization ####
         # beginning variables
@@ -448,7 +450,10 @@ while not crashed:
             x += card_width
         y += card_height
     #print step
-    # END OF GAME CODE
+
+    ##########################
+    #### END OF GAME CODE ####
+    ##########################
 
     #### Print Dealer Cards ####
     x = 0
