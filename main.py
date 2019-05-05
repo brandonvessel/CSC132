@@ -324,34 +324,37 @@ def place_text(text, x, y):
 ##### Player Initialization ####
 players = []
 player_count = 3
+
+# Put player objects into players[]
 for i in range(player_count):
     # add a player until player count is met
     players.append(Player(i+1))
 
+# Create dealer #
 dealer = Dealer()
+
 
 ##### Deck initialization ####
 # Make deck as a stack object
 deck = Stack()
 
-#shuffle_cards()
-#deck.shuffle()
-#deck.print_deck()
-
-print("\n\n")
-
 
 ##### Pygame Setup #####
+# Room values
 display_width = card_width * 8
 display_height = card_height * player_count
 room_width = display_width      # just in case we decide to use these names later
 room_height = display_height    # just in case we decide to use these names later
+
+# Display
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Gambling.. But With Math')
 
+# Background colors
 black = (0,0,0)
 green = (0,100,0)
 
+# Engine
 clock = pygame.time.Clock()
 crashed = False
 
@@ -362,9 +365,9 @@ crashed = False
 buttons = [17, 16, 13]
 RGB_LED = [18, 19, 20]
 
-#GPIO.setmode(GPIO.BCM)
-#GPIO.setup(RGB_LED, GPIO.OUT)
-#GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(RGB_LED, GPIO.OUT)
+GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 
 ############################################
