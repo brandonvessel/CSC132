@@ -320,6 +320,26 @@ def place_text(text, x, y):
     textsurface = myfont.render(text, False, (0,0,0))
     gameDisplay.blit(textsurface,(x,y))
 
+# RGB LED functions
+def rgb_red():
+    GPIO.output(RGB_LED[1],False)
+    GPIO.output(RGB_LED[2],False)
+    GPIO.output(RGB_LED[0],True)
+
+def rgb_green():
+    GPIO.output(RGB_LED[0],False)
+    GPIO.output(RGB_LED[2],False)
+    GPIO.output(RGB_LED[1],True)
+
+def rgb_blue():
+    GPIO.output(RGB_LED[0],False)
+    GPIO.output(RGB_LED[1],False)
+    GPIO.output(RGB_LED[2],True)
+
+def rgb_off():
+    GPIO.output(RGB_LED[0],False)
+    GPIO.output(RGB_LED[1],False)
+    GPIO.output(RGB_LED[2],False)
 
 ############################################
 ############## INITIALIZATION ##############
@@ -407,6 +427,7 @@ while not crashed:
         step = "player_input"
 
     if step == "player_input":
+        
         #### Player Input ####
         player = players[player_turn]
 
