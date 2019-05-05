@@ -304,15 +304,14 @@ GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 ################### Main ###################
 ############################################
 ##### Run Game ####
-step = 0
+step = "initialization"
 while not crashed:
     # Background
     gameDisplay.fill(green)
 
     # GAME CODE
-    if step == 0:
-        player_turn = 0
-        y = 0
+    if step == "initialization":
+        # Initialization
         # shuffle deck
         deck.shuffle()
         print "Deck shuffled"
@@ -320,14 +319,15 @@ while not crashed:
         for player in players:
             hit(player)
             hit(player)
-            x = 0
             for card in player.hand:
                 print "Player: {} Card: {}".format(player, card)
-                place_card(x, y, card.image)
-                x += card_width
-            y += card_height
-        step = 1
+        step = "player_input"
         
+    if step == "player_input":
+        # Get player input
+        pass
+        
+    print "Waiting for player input"
     
     #print "Waiting for player input"
     if step == 1:
@@ -349,8 +349,6 @@ while not crashed:
             place_card(x, y, card.image)
             x += card_width
         y += card_height
-    #print step
-    # END OF GAME CODE
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -358,6 +356,7 @@ while not crashed:
 
     pygame.display.update()
     clock.tick(60)
-    
+
+
 pygame.quit()
 quit()
