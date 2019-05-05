@@ -2,8 +2,9 @@ from random import randint
 import pygame
 import RPi.GPIO as GPIO
 
-
+# Initialize pygame
 pygame.init()
+
 # Card values
 card_width, card_height = 139, 212
 
@@ -11,7 +12,7 @@ card_width, card_height = 139, 212
 ############################################
 ################# CLASSES ##################
 ############################################
-class Player():
+class Player(Object):
     def __init__(self, number):
         # List of cards in hand
         self.hand = []
@@ -151,6 +152,14 @@ class Card():
         return "{} of {}".format(self.name, self.suit)
 
 
+class Dealer(Player):
+    def __init__(self):
+        self.hand = []
+    
+    def __str__(self):
+        return "Dealer"
+
+
 ############################################
 ################ FUNCTIONS #################
 ############################################
@@ -207,7 +216,6 @@ def hit(self):
 	# Input: player object
 	# Output: none
 	# Purpose: takes the player's hand and adds a card to it. Detects a win/lose scenario and reacts accordingly.
-
 	self.hand.append(deck.pop())
 	
 
@@ -227,14 +235,15 @@ def win():
     pass
 
 
-def dealer_turn():
+def dealer_turn(player_list):
         # Input: none
         # Output: none
         # Purpose: simulates the dealer's turn based on the dealer's and player's cards
         # note: dealer will always hit if the player has a higher score and sometimes hit when tied
-        while(get_score(dealer.hand)<= get_score(player.hand) and get_score(dealer.hand)!=21):
-            if(get_score(dealer.hand)==get_score(player.hand)):
-                if(get_bust_chance(dealer.hand)<50):
+        global dealer
+        while(get_score(dealer.hand) <= get_score(player.hand) and get_score(dealer.hand)!=21):
+            if(get_score(dealer.hand) == get_score(player.hand)):
+                if(get_bust_chance(dealer.hand) < 50):
                     print "tied but hit"
                     hit(dealer)
                 else:
@@ -262,6 +271,7 @@ player_count = 3
 for i in range(player_count):
     players.append(Player(i+1))
 
+dealer = Dealer()
 
 ##### Deck initialization ####
 # Make deck as a stack object
@@ -275,10 +285,10 @@ print("\n\n")
 
 
 ##### Pygame Setup #####
-#display_width = 800
-#display_height = 600
 display_width = card_width * 8
 display_height = card_height * player_count
+room_width = display_width      # just in case we decide to use these names later
+room_height = display_height    # just in case we decide to use these names later
 x = 50
 y = 300
 gameDisplay = pygame.display.set_mode((display_width, display_height))
@@ -309,9 +319,12 @@ while not crashed:
     # Background
     gameDisplay.fill(green)
 
+
     # GAME CODE
     if step == "initialization":
-        # Initialization
+        #### Initialization ####
+        # beginning variables
+        player_turn = 0
         # shuffle deck
         deck.shuffle()
         print "Deck shuffled"
@@ -322,15 +335,10 @@ while not crashed:
             for card in player.hand:
                 print "Player: {} Card: {}".format(player, card)
         step = "player_input"
-        
-    if step == "player_input":
-        # Get player input
-        pass
-        
-    print "Waiting for player input"
-    
+
+
     #print "Waiting for player input"
-    if step == 1:
+    if step == "player_input":
         player = players[player_turn]
         if (GPIO.input(buttons[0] == GPIO.HIGH)):
             hit(player)
@@ -342,6 +350,7 @@ while not crashed:
         if (GPIO.input(buttons[2] == GPIO.HIGH)):
             get_bust_chance(player.hand)
                 
+
     y = 0
     for player in players:
         x = 0
@@ -350,9 +359,11 @@ while not crashed:
             x += card_width
         y += card_height
 
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
+
 
     pygame.display.update()
     clock.tick(60)
