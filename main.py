@@ -10,7 +10,7 @@ pygame.init()
 card_width, card_height = 70, 106
 card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
 card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
-
+card_back = pygame.transform.scale(card_back, (card_width, card_height))
 
 ############################################
 ################# CLASSES ##################
@@ -239,6 +239,7 @@ def win(player):
     x = 0
     y = 0
     while (y < display_height):
+        print len(deck.cards)
         place_card(x, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(x + card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(display_width - card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
@@ -365,16 +366,16 @@ crashed = False
 buttons = [17, 16, 13]
 RGB_LED = [18, 19, 20]
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(RGB_LED, GPIO.OUT)
-GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+#GPIO.setmode(GPIO.BCM)
+#GPIO.setup(RGB_LED, GPIO.OUT)
+#GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 
 ############################################
 ################### Main ###################
 ############################################
 ##### Run Game ####
-step = 0
+step = "initialization"
 while not crashed:
     # Background. Must run at the beginning of each frame.
     gameDisplay.fill(green)
@@ -403,7 +404,6 @@ while not crashed:
         hit(dealer)
         step = "player_input"
 
-
     if step == "player_input":
         #### Player Input ####
         player = players[player_turn]
@@ -419,12 +419,10 @@ while not crashed:
                 print("Player {} BUSTED!\n Next player".format(player))
                 player_turn += 1
         
-
         ## STAY ##
         if (GPIO.input(buttons[1]) == GPIO.HIGH):
             print("Player {} stayed".format(player))
             player_turn += 1
-
             
         ## GET BUST CHANCE ##
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
@@ -434,7 +432,7 @@ while not crashed:
         if(player_turn == len(players)-1):
                 print("All players have gone.\nIt's the dealer's turn")
                 step = "dealer_turn"
-    
+
     #### Dealer Turn ####
     if step == "dealer_turn":
         # winner is the return value of dealer_turn()
@@ -454,15 +452,18 @@ while not crashed:
         y += card_height
     #print step
 
+    #win(players[0])
+
     ##########################
     #### END OF GAME CODE ####
     ##########################
 
     #### Print Dealer Cards ####
-    x = 0
+    x = display_width - card_width
     for card in dealer.hand:
-        place_card(x, y, card.image)
-        place_card(x + card_width, y, card_back)
+        place_card(x, 0, card.image)
+        x -= card_width
+    place_card(x, 0, card_back)
     
 
 
@@ -471,7 +472,6 @@ while not crashed:
             crashed = True
 
 
-    win(player)
     #place_text()
     # main pygame display commands. must run at the end of each frame
     pygame.display.update()
