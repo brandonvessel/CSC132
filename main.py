@@ -183,7 +183,8 @@ class RGB():
     
     def blue(self):
         # Turn on blue pin, Turn off other pins.
-        GPIO.output(R,False)        GPIO.output(G,False)
+        GPIO.output(R,False)
+        GPIO.output(G,False)
         GPIO.output(B,True)
 
     def off(self):
