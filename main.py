@@ -163,6 +163,25 @@ class Dealer(Player):
         return "Dealer"
 
 
+class RGB():
+    def __init__(self, R, G, B):
+        self.r = R
+        self.g = G
+        self.b = B
+    
+    def red(self):
+        pass
+    
+    def green(self):
+        pass
+    
+    def blue(self):
+        pass
+
+    def off(self):
+        pass
+
+
 ############################################
 ################ FUNCTIONS #################
 ############################################
