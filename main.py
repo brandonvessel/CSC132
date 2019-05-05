@@ -304,6 +304,7 @@ def place_card(x, y, image):
 players = []
 player_count = 3
 for i in range(player_count):
+    # add a player until player count is met
     players.append(Player(i+1))
 
 dealer = Dealer()
@@ -336,6 +337,7 @@ crashed = False
 
 ###########################################
 ###############GPIO setup##################
+###########################################
 buttons = [17, 16, 13]
 RGB_LED = [18, 19, 20]
 
@@ -343,13 +345,14 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(RGB_LED, GPIO.OUT)
 GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
+
 ############################################
 ################### Main ###################
 ############################################
 ##### Run Game ####
 step = "initialization"
 while not crashed:
-    # Background
+    # Background. Must run at the beginning of each frame.
     gameDisplay.fill(green)
 
 
@@ -374,26 +377,46 @@ while not crashed:
         step = "player_input"
 
 
-    #print "Waiting for player input"
     if step == "player_input":
+        #### Player Input ####
         player = players[player_turn]
+
+        ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
+            print("Player {} hit".format(player))
             hit(player)
             sleep(1)
-            if (get_score(player) >= 21):
+
+            # change the player turn if the player busted
+            if (get_score(player.hand) >= 21):
+                print("Player {} BUSTED!\n Next player".format(player))
                 player_turn += 1
+        
+
+        ## STAY ##
         if (GPIO.input(buttons[1]) == GPIO.HIGH):
+            print("Player {} stayed".format(player))
             player_turn += 1
-            if(player_turn == len(players)-1):
-                step = "dealer_turn"
+
+            
+        ## GET BUST CHANCE ##
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
-            get_bust_chance(player.hand)
+            chance = get_bust_chance(player.hand)
+        
+        # Determing if all players have gone and move forward.
+        if(player_turn == len(players)-1):
+                print("All players have gone.\nIt's the dealer's turn")
+                step = "dealer_turn"
     
     if step == "dealer_turn":
         # winner is the return value of dealer_turn()
         winner = dealer_turn()
+        print("\n\n" + winner)
+        step = "end"
 
-    # print player cards
+
+    #### DISPLAY SPRITES AND SCORES ###
+    #### Print Player Cards ###
     y = 0
     for player in players:
         x = 0
@@ -402,7 +425,7 @@ while not crashed:
             x += card_width
         y += card_height
 
-    # print dealer cards
+    #### Print Dealer Cards
     x = 0
     for card in dealer.hand:
         place_card(x, y, card.image)
@@ -415,6 +438,7 @@ while not crashed:
             crashed = True
 
 
+    # main pygame display commands. must run at the end of each frame
     pygame.display.update()
     clock.tick(60)
 
