@@ -2,16 +2,19 @@ from random import randint
 import pygame
 #import RPi.GPIO as GPIO
 
-
+# Initialize pygame
 pygame.init()
+
 # Card values
 card_width, card_height = 139, 212
+card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
+card_back = "./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_back)-1)])
 
 
 ############################################
 ################# CLASSES ##################
 ############################################
-class Player():
+class Player(object):
     def __init__(self, number):
         # List of cards in hand
         self.hand = []
@@ -151,6 +154,14 @@ class Card():
         return "{} of {}".format(self.name, self.suit)
 
 
+class Dealer(Player):
+    def __init__(self):
+        self.hand = []
+    
+    def __str__(self):
+        return "Dealer"
+
+
 ############################################
 ################ FUNCTIONS #################
 ############################################
@@ -207,7 +218,6 @@ def hit(self):
 	# Input: player object
 	# Output: none
 	# Purpose: takes the player's hand and adds a card to it. Detects a win/lose scenario and reacts accordingly.
-
 	self.hand.append(deck.pop())
 	
 
@@ -240,22 +250,56 @@ def win(player):
 
 
 def dealer_turn():
-        # Input: none
-        # Output: none
-        # Purpose: simulates the dealer's turn based on the dealer's and player's cards
-        # note: dealer will always hit if the player has a higher score and sometimes hit when tied
-        while(get_score(dealer.hand)<= get_score(player.hand) and get_score(dealer.hand)!=21):
-            if(get_score(dealer.hand)==get_score(player.hand)):
-                if(get_bust_chance(dealer.hand)<50):
-                    print "tied but hit"
-                    hit(dealer)
-                else:
-                    return
-            else:
-                print "score before: {}".format(get_score(dealer.hand))
-                print "losing so hit"
+    # Input: none
+    # Output: none
+    # Purpose: simulates the dealer's turn based on the dealer's and player's cards
+    # note: dealer will always hit if the player has a higher score and sometimes hit when tied
+    global dealer
+    global players
+
+    # dealer only has 1 card, hit
+    hit(dealer)
+    # find highest scoring player
+    highest = 0
+    highest_player = None
+
+    # determine if any players have valid hands
+    valid = 0
+    for player in players:
+        if(player.score < 21):
+            valid += 1
+
+    if(valid == 0):
+        print "All players busted, dealer wins!"
+        return
+
+    # iterate through players
+    for player in players:
+        # if player did not bust and has a higher score than the lowest
+        if((player.score < 22) and (player.score > highest.score)):
+            highest_player = player
+            highest = player.score
+    
+    player = highest_player
+    
+
+    while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
+        if(get_score(dealer.hand) == get_score(player.hand)):
+            if(get_bust_chance(dealer.hand) < 50):
+                print "tied but hit"
                 hit(dealer)
-                print "score after: {}".format(get_score(dealer.hand))
+            else:
+                break
+        else:
+            print "score before: {}".format(get_score(dealer.hand))
+            print "losing so hit"
+            hit(dealer)
+            print "score after: {}".format(get_score(dealer.hand))
+    
+    if(dealer.score > highest and dealer.score < 22):
+        return "Dealer wins!"
+    else:
+        return "Player {} wins!".format(highest_player)
 
 
 def place_card(x, y, image):
@@ -280,8 +324,10 @@ def place_text(text, x, y):
 players = []
 player_count = 3
 for i in range(player_count):
+    # add a player until player count is met
     players.append(Player(i+1))
 
+dealer = Dealer()
 
 ##### Deck initialization ####
 # Make deck as a stack object
@@ -295,12 +341,10 @@ print("\n\n")
 
 
 ##### Pygame Setup #####
-#display_width = 800
-#display_height = 600
 display_width = card_width * 8
 display_height = card_height * player_count
-x = 50
-y = 300
+room_width = display_width      # just in case we decide to use these names later
+room_height = display_height    # just in case we decide to use these names later
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Gambling.. But With Math')
 
@@ -313,12 +357,14 @@ crashed = False
 
 ###########################################
 ###############GPIO setup##################
-#buttons = [17, 16, 13]
-#RGB_LED = [18, 19, 20]
+###########################################
+buttons = [17, 16, 13]
+RGB_LED = [18, 19, 20]
 
 #GPIO.setmode(GPIO.BCM)
 #GPIO.setup(RGB_LED, GPIO.OUT)
 #GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+
 
 ############################################
 ################### Main ###################
@@ -326,13 +372,16 @@ crashed = False
 ##### Run Game ####
 step = 0
 while not crashed:
-    # Background
+    # Background. Must run at the beginning of each frame.
     gameDisplay.fill(green)
 
+
     # GAME CODE
-    if step == 0:
+    if step == "initialization":
+        #### Initialization ####
+        # beginning variables
         player_turn = 0
-        y = 0
+        winner = ""
         # shuffle deck
         deck.shuffle()
         print "Deck shuffled"
@@ -343,24 +392,52 @@ while not crashed:
             x = 0
             for card in player.hand:
                 print "Player: {} Card: {}".format(player, card)
-                place_card(x, y, card.image)
-                x += card_width
-            y += card_height
-        step = 1
         
+        # dealer "only gets 1 card." 1 card is added during the dealer's turn
+        hit(dealer)
+        step = "player_input"
+
+
+    if step == "player_input":
+        #### Player Input ####
+        player = players[player_turn]
+
+        ## HIT ##
+        if (GPIO.input(buttons[0]) == GPIO.HIGH):
+            print("Player {} hit".format(player))
+            hit(player)
+            sleep(1)
+
+            # change the player turn if the player busted
+            if (get_score(player.hand) >= 21):
+                print("Player {} BUSTED!\n Next player".format(player))
+                player_turn += 1
+        
+
+        ## STAY ##
+        if (GPIO.input(buttons[1]) == GPIO.HIGH):
+            print("Player {} stayed".format(player))
+            player_turn += 1
+
+            
+        ## GET BUST CHANCE ##
+        if (GPIO.input(buttons[2]) == GPIO.HIGH):
+            chance = get_bust_chance(player.hand)
+        
+        # Determing if all players have gone and move forward.
+        if(player_turn == len(players)-1):
+                print("All players have gone.\nIt's the dealer's turn")
+                step = "dealer_turn"
     
-    #print "Waiting for player input"
-    #if step == 1:
-     #   player = players[player_turn]
-      #     hit(player)
-        #    if (get_score(player) > 21):
-         #       player_turn += 1
-        #if (GPIO.input(buttons[1] == GPIO.HIGH)):
-         #   player_turn += 1
-          #  dealer_turn()
-       # if (GPIO.input(buttons[2] == GPIO.HIGH)):
-        #    get_bust_chance(player.hand)
-                
+    if step == "dealer_turn":
+        # winner is the return value of dealer_turn()
+        winner = dealer_turn()
+        print("\n\n" + winner)
+        step = "end"
+
+
+    #### DISPLAY SPRITES AND SCORES ###
+    #### Print Player Cards ###
     y = 0
     for player in players:
         x = 0
@@ -371,12 +448,22 @@ while not crashed:
     #print step
     # END OF GAME CODE
 
+    #### Print Dealer Cards
+    x = 0
+    for card in dealer.hand:
+        place_card(x, y, card.image)
+        place_card(x + card_width, y, card_back)
+    
+
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             crashed = True
-            
+
+
     win(player)
     #place_text()
+    # main pygame display commands. must run at the end of each frame
     pygame.display.update()
     clock.tick(60)
     
