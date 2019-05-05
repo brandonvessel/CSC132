@@ -165,20 +165,24 @@ class Dealer(Player):
 
 class RGB():
     def __init__(self, R, G, B):
-        self.r = R
-        self.g = G
-        self.b = B
+        self.r = R      # Red pin
+        self.g = G      # Green pin
+        self.b = B      # Blue pin
     
     def red(self):
+        # Turn on red pin. Turn off other pins.
         pass
     
     def green(self):
+        # Turn on green pin. Turn off other pins.
         pass
     
     def blue(self):
+        # Turn on blue pin, Turn off other pins.
         pass
 
     def off(self):
+        # Turn off all pins.
         pass
 
 
