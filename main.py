@@ -1,5 +1,7 @@
 from random import randint
 import pygame
+import RPi.GPIO as GPIO
+
 
 pygame.init()
 # Card values
@@ -289,6 +291,15 @@ clock = pygame.time.Clock()
 crashed = False
 
 
+###########################################
+###############GPIO setup##################
+buttons = [17, 16, 13]
+RGB_LED = [18, 19, 20]
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(RGB_LED, GPIO.OUT)
+GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
+
 ############################################
 ################### Main ###################
 ############################################
@@ -300,6 +311,7 @@ while not crashed:
 
     # GAME CODE
     if step == 0:
+        player_turn = 0
         y = 0
         # shuffle deck
         deck.shuffle()
@@ -318,6 +330,18 @@ while not crashed:
         
     
     #print "Waiting for player input"
+    if step == 1:
+        player = players[player_turn]
+        if (GPIO.input(buttons[0] == GPIO.HIGH)):
+            hit(player)
+            if (get_score(player) > 21):
+                player_turn += 1
+        if (GPIO.input(buttons[1] == GPIO.HIGH)):
+            player_turn += 1
+            dealer_turn()
+        if (GPIO.input(buttons[2] == GPIO.HIGH)):
+            get_bust_chance(player.hand)
+                
     y = 0
     for player in players:
         x = 0
