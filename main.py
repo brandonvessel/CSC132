@@ -164,34 +164,41 @@ class Dealer(Player):
 
 
 class RGB():
-    def __init__(self, R, G, B):
+    def __init__(self, num, R, G, B):
+        self.number =num
         self.r = R      # Red pin
         self.g = G      # Green pin
         self.b = B      # Blue pin
     
-    def red(self):
+    def red(self):                      # red led means bust
         # Turn on red pin. Turn off other pins.
-        GPIO.output(R,True)
-        GPIO.output(G,False)
-        GPIO.output(B,False)
+        GPIO.output(self.r,True)
+        GPIO.output(self.g,False)
+        GPIO.output(self.b,False)
     
-    def green(self):
+    def green(self):                    # green led means blackjack or win
         # Turn on green pin. Turn off other pins.
-        GPIO.output(R,False)
-        GPIO.output(G,True)
-        GPIO.output(B,False)
+        GPIO.output(self.r,False)
+        GPIO.output(self.g,True)
+        GPIO.output(self.b,False)
     
-    def blue(self):
+    def blue(self):                     # blue led means its the current players turn
         # Turn on blue pin, Turn off other pins.
-        GPIO.output(R,False)
-        GPIO.output(G,False)
-        GPIO.output(B,True)
+        GPIO.output(self.r,False)
+        GPIO.output(self.g,False)
+        GPIO.output(self.b,True)
+    
+    def purple(self):                   # purple means tied with dealer
+        # Turn on blue pin, Turn off other pins.
+        GPIO.output(self.r,True)
+        GPIO.output(self.g,False)
+        GPIO.output(self.b,True)
 
     def off(self):
         # Turn off all pins.
-        GPIO.output(R,False)
-        GPIO.output(G,False)
-        GPIO.output(B,False)
+        GPIO.output(self.r,False)
+        GPIO.output(self.g,False)
+        GPIO.output(self.b,False)
 
 ############################################
 ################ FUNCTIONS #################
@@ -268,6 +275,7 @@ def win(winners):
 	# Output: none
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
     global deck
+    global RGB_LEDS
     x = 0
     y = 0
     while (y < display_height):
@@ -286,10 +294,16 @@ def win(winners):
     elif (winners[len(winners) -1] == "tie"):
         winners.pop()
         for winner in winners:
+            for led in RGB_LEDS:
+                if(led.number==winner.number):
+                    led.purple()
             place_text("The dealer tied with Player {}".format(winner.number), x, y)
             y += 50
     
     for winner in winners:
+        for led in RGB_LEDS:
+                if(led.number==winner.number):
+                    led.green()
         place_text("Player {} is a winner".format(winner.number), x, y)
         y += 50
 
@@ -454,9 +468,9 @@ RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 
-RGB1 = RGB(18,19,20)
-RGB2 = RGB(21,22,23)
-RGB3 = RGB(24,25,26)
+RGB1 = RGB(1,18,19,20)
+RGB2 = RGB(2,21,22,23)
+RGB3 = RGB(3,24,25,26)
 
 RGB_LEDS = [RGB1, RGB2, RGB3]
 
@@ -497,15 +511,22 @@ while not crashed:
         # dealer "only gets 1 card." 1 card is added during the dealer's turn
         hit(dealer)
         step = "player_input"
-
+        # LEDs are initially off
+        RGB1.off()
+        RGB2.off()
+        RGB3.off()
+        
     if step == "player_input":
         
         #### Player Input ####
         player = players[player_turn]
         led = RGB_LEDS[player_turn]
+        # current player led is blue
+        led.blue()
         
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
+            led.green()
             player_turn += 1
 
         ## HIT ##
@@ -517,11 +538,13 @@ while not crashed:
             # change the player turn if the player busted
             if (get_score(player.hand) > 21):
                 print("Player {} BUSTED!\n Next player".format(player))
+                led.red()
                 player_turn += 1
         
         ## STAY ##
         if (GPIO.input(buttons[1]) == GPIO.HIGH):
             print("Player {} stayed".format(player))
+            led.off()
             player_turn += 1
             sleep(1)
             
