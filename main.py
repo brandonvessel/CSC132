@@ -1,7 +1,7 @@
 from random import randint
 import pygame
 import RPi.GPIO as GPIO
-from time import sleep
+from time import sleep, time
 
 # Initialize pygame
 pygame.init()
@@ -263,7 +263,7 @@ def lose():
 '''
 
 
-def win(winners[]):
+def win(winners):
 	# Input: player object
 	# Output: none
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
@@ -271,16 +271,27 @@ def win(winners[]):
     x = 0
     y = 0
     while (y < display_height):
-        #print len(deck.cards)
         #makes a card waterfall
         place_card(x, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(x + card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(display_width - card_width, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         place_card(display_width - card_width*2, y, deck.cards[randint(0, len(deck.cards)-1)].image)
         y += 50
+        #each winner is printed to the screen
+    x = display_width/2 - 75
+    y = display_height/2-50
+    if (len(winners) == 0):
+        place_text("The dealer is the winner", x, y)
+        
+    elif (winners[len(winners) -1] == "tie"):
+        winners.pop()
+        for winner in winners:
+            place_text("The dealer tied with Player {}".format(winner.number), x, y)
+            y += 50
+    
     for winner in winners:
-    place_text("{} is a winner\n".format(winners[winner], display_width/2-50, display_height/2-50))
-    print ("{} is the winner".format(player.number))
+        place_text("Player {} is a winner".format(winner.number), x, y)
+        y += 50
 
 
 def dealer_turn():
@@ -293,6 +304,8 @@ def dealer_turn():
 
     # dealer only has 1 card, hit
     hit(dealer)
+    render_cards()
+    sleep(1.5)
     # find highest scoring player
     highest = 0
     highest_player = None
@@ -300,7 +313,7 @@ def dealer_turn():
     # determine if any players have valid hands
     valid = 0
     for player in players:
-        if(get_score(player.hand) < 21):
+        if(get_score(player.hand) < 22):
             valid += 1
 
     if(valid == 0):
@@ -328,9 +341,19 @@ def dealer_turn():
             print "losing so hit"
             hit(dealer)
             print "score after: {}".format(get_score(dealer.hand))
+        render_cards()
+        sleep(1.5)
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
         return "Dealer wins!", []
+    elif(get_score(dealer.hand) == highest):
+        winners = []
+        for player in players:
+            if (get_score(player.hand) == highest):
+                winners.append(player)
+            winners.append("tie")
+            return "tied dealer...", winners
+                
     else:
         score = 0
         statement = ""
@@ -338,7 +361,7 @@ def dealer_turn():
         for player in players:
             if(get_score(player.hand) < 22 and get_score(player.hand) > score):
                 statement = statement + "Player {} wins!\n".format(player)
-                winners.append(repr(player))
+                winners.append(player)
         return statement, winners
 
 
@@ -356,6 +379,29 @@ def place_text(text, x, y):
     textsurface = myfont.render(text, False, (0,0,0))
     gameDisplay.blit(textsurface,(x,y))
 
+
+def render_cards():
+    # Render the dealer drawing cards
+    gameDisplay.fill(green)
+    #### Print Player Cards ####
+    y = 0
+    for player in players:
+        x = 0
+        for card in player.hand:
+            place_card(x, y, card.image)
+            x += card_width
+        y += card_height
+
+    #### Print Dealer Cards ####
+    x = display_width - card_width
+    for card in dealer.hand:
+        place_card(x, 0, card.image)
+        x -= card_width
+    if(step == "player_input"):
+        place_card(x, 0, card_back)
+    pygame.display.update()
+    clock.tick(60)
+    gameDisplay.fill(green)
 
 
 ############################################
@@ -381,7 +427,7 @@ deck = Stack()
 
 ##### Pygame Setup #####
 # Room values
-display_width = card_width * 8
+display_width = card_width * 10
 display_height = card_height * player_count
 room_width = display_width      # just in case we decide to use these names later
 room_height = display_height    # just in case we decide to use these names later
@@ -397,12 +443,14 @@ green = (0,100,0)
 # Engine
 clock = pygame.time.Clock()
 crashed = False
+end_duration = 5 # seconds to display the end/victory message
 
 
 ###########################################
 ###############GPIO setup##################
 ###########################################
 buttons = [17, 16, 13]
+RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 
@@ -492,7 +540,19 @@ while not crashed:
         # winner is the return value of dealer_turn()
         winner, winners = dealer_turn()
         print("\n\n" + winner)
-        step = "end"
+        for player in players:
+            player.reset()
+        dealer.reset()
+        step = "end1"
+
+    if step == "end1":
+        end_times = time()
+        step = "end2"
+
+    if step == "end2":
+        win(winners)
+        if((time() - end_times) > end_duration):
+            step = "initialization"
 
 
     #### DISPLAY SPRITES AND SCORES ####
@@ -517,7 +577,8 @@ while not crashed:
     for card in dealer.hand:
         place_card(x, 0, card.image)
         x -= card_width
-    place_card(x, 0, card_back)
+    if(step == "player_input"):
+        place_card(x, 0, card_back)
     
 
 
@@ -525,7 +586,7 @@ while not crashed:
         if event.type == pygame.QUIT:
             crashed = True
 
-
+    
     #place_text()
     # main pygame display commands. must run at the end of each frame
     #chance = get_bust_chance(player.hand)
