@@ -165,40 +165,46 @@ class Dealer(Player):
 
 class RGB():
     def __init__(self, num, R, G, B):
-        self.number =num
-        self.r = R      # Red pin
-        self.g = G      # Green pin
-        self.b = B      # Blue pin
+        self.number = num   # Corrisponding player
+        self.r = R          # Red pin
+        self.g = G          # Green pin
+        self.b = B          # Blue pin
+        self.state = ""     # Current LED state
     
     def red(self):                      # red led means bust
         # Turn on red pin. Turn off other pins.
         GPIO.output(self.r,True)
         GPIO.output(self.g,False)
         GPIO.output(self.b,False)
+        self.state = "red"
     
     def green(self):                    # green led means blackjack or win
         # Turn on green pin. Turn off other pins.
         GPIO.output(self.r,False)
         GPIO.output(self.g,True)
         GPIO.output(self.b,False)
-    
+        self.state = "green"
+        
     def blue(self):                     # blue led means its the current players turn
         # Turn on blue pin, Turn off other pins.
         GPIO.output(self.r,False)
         GPIO.output(self.g,False)
         GPIO.output(self.b,True)
-    
+        self.state = "blue"
+        
     def purple(self):                   # purple means tied with dealer
-        # Turn on blue pin, Turn off other pins.
+        # Turn on blue and red pin, Turn off other pins.
         GPIO.output(self.r,True)
         GPIO.output(self.g,False)
         GPIO.output(self.b,True)
-
+        self.state = "purple"
+        
     def off(self):
         # Turn off all pins.
         GPIO.output(self.r,False)
         GPIO.output(self.g,False)
         GPIO.output(self.b,False)
+        self.state = "off"
 
 ############################################
 ################ FUNCTIONS #################
@@ -289,6 +295,8 @@ def win(winners):
     x = display_width/2 - 75
     y = display_height/2-50
     if (len(winners) == 0):
+        for led in RGB_LEDS:
+            led.red()
         place_text("The dealer is the winner", x, y)
         
     elif (winners[len(winners) -1] == "tie"):
@@ -297,13 +305,20 @@ def win(winners):
             for led in RGB_LEDS:
                 if(led.number==winner.number):
                     led.purple()
+            for led in RGB_LEDS:
+                if(led.state!="purple"):
+                    led.red()
             place_text("The dealer tied with Player {}".format(winner.number), x, y)
             y += 50
     
     for winner in winners:
         for led in RGB_LEDS:
-                if(led.number==winner.number):
-                    led.green()
+            if(led.number==winner.number):
+                led.green()
+        for led in RGB_LEDS:
+            if(led.state!="green"):
+                led.red()
+            
         place_text("Player {} is a winner".format(winner.number), x, y)
         y += 50
 
@@ -499,7 +514,17 @@ while not crashed:
         winner = ""
         # shuffle deck
         deck.shuffle()
+        deck.push(Card("Jack", "Spades", [10]))
+        deck.push(Card("Jack", "Spades", [10]))
+        deck.push(Card("Jack", "Spades", [10]))
+        deck.push(Card("Jack", "Spades", [10]))
+        deck.push(Card("Jack", "Spades", [10]))
+        deck.push(Card("Jack", "Spades", [10]))
+        deck.push(Card("Jack", "Spades", [10]))
+        deck.push(Card("Jack", "Spades", [10]))
+        
         print "Deck shuffled"
+        
         # set 2 cards in each players hand
         for player in players:
             hit(player)
