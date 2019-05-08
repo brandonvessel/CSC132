@@ -171,20 +171,27 @@ class RGB():
     
     def red(self):
         # Turn on red pin. Turn off other pins.
-        pass
+        GPIO.output(R,True)
+        GPIO.output(G,False)
+        GPIO.output(B,False)
     
     def green(self):
         # Turn on green pin. Turn off other pins.
-        pass
+        GPIO.output(R,False)
+        GPIO.output(G,True)
+        GPIO.output(B,False)
     
     def blue(self):
         # Turn on blue pin, Turn off other pins.
-        pass
+        GPIO.output(R,False)
+        GPIO.output(G,False)
+        GPIO.output(B,True)
 
     def off(self):
         # Turn off all pins.
-        pass
-
+        GPIO.output(R,False)
+        GPIO.output(G,False)
+        GPIO.output(B,False)
 
 ############################################
 ################ FUNCTIONS #################
@@ -445,8 +452,16 @@ end_duration = 5 # seconds to display the end/victory message
 buttons = [17, 16, 13]
 RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 
+RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
+
+RGB1 = RGB(18,19,20)
+RGB2 = RGB(21,22,23)
+RGB3 = RGB(24,25,26)
+
+RGB_LEDS = [RGB1, RGB2, RGB3]
+
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(RGB_LED, GPIO.OUT)
+GPIO.setup(RGB_LED_INDICES, GPIO.OUT)
 GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 
 
@@ -484,9 +499,11 @@ while not crashed:
         step = "player_input"
 
     if step == "player_input":
+        
         #### Player Input ####
         player = players[player_turn]
-
+        led = RGB_LEDS[player_turn]
+        
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
             player_turn += 1
