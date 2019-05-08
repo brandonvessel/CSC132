@@ -6,10 +6,6 @@ from time import sleep, time
 # Initialize pygame
 pygame.init()
 
-# Card values
-card_width, card_height = 70, 106
-card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
-
 ############################################
 ################# CLASSES ##################
 ############################################
@@ -422,6 +418,9 @@ dealer = Dealer()
 # Make deck as a stack object
 deck = Stack()
 
+# Card values
+card_width, card_height = 70, 106
+card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
 
 ##### Pygame Setup #####
 # Room values
