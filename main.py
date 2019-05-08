@@ -375,8 +375,9 @@ def place_text(text, x, y):
 
 
 def render_cards():
-    # Render the dealer drawing cards
-    gameDisplay.fill(green)
+    #### Render the dealer drawing cards
+    place_card(0,0,background_image)
+
     #### Print Player Cards ####
     y = 0
     for player in players:
@@ -435,9 +436,10 @@ room_height = display_height    # just in case we decide to use these names late
 gameDisplay = pygame.display.set_mode((display_width, display_height), pygame.FULLSCREEN)
 pygame.display.set_caption('Gambling.. But With Math')
 
-# Background colors
-black = (0,0,0)
-green = (0,100,0)
+# Background
+#black = (0,0,0)
+#green = (0,100,0)
+background_image = pygame.image.load("./sprites/background/background.png")
 
 # Engine
 clock = pygame.time.Clock()
@@ -471,7 +473,7 @@ GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 step = "initialization"
 while not crashed:
     # Background. Must run at the beginning of each frame.
-    gameDisplay.fill(green)
+    place_card(0,0,background_image)
 
     ###################
     #### GAME CODE ####
