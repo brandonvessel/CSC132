@@ -9,8 +9,6 @@ pygame.init()
 # Card values
 card_width, card_height = 70, 106
 card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
-card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
-card_back = pygame.transform.scale(card_back, (card_width, card_height))
 
 ############################################
 ################# CLASSES ##################
@@ -480,13 +478,19 @@ while not crashed:
 
     if step == "initialization":
         #### Initialization ####
-        # beginning variables
+        # Beginning variables
         player_turn = 0
         winner = ""
-        # shuffle deck
+
+        # Shuffle deck
         deck.shuffle()
         print "Deck shuffled"
-        # set 2 cards in each players hand
+
+        # Determine card backs
+        card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
+        card_back = pygame.transform.scale(card_back, (card_width, card_height))
+
+        # Set 2 cards in each players hand
         for player in players:
             hit(player)
             hit(player)
@@ -494,12 +498,11 @@ while not crashed:
             for card in player.hand:
                 print "Player: {} Card: {}".format(player, card)
         
-        # dealer "only gets 1 card." 1 card is added during the dealer's turn
+        # Dealer "only gets 1 card." 1 card is added during the dealer's turn
         hit(dealer)
         step = "player_input"
 
     if step == "player_input":
-        
         #### Player Input ####
         player = players[player_turn]
         led = RGB_LEDS[player_turn]
@@ -586,11 +589,7 @@ while not crashed:
         if event.type == pygame.QUIT:
             crashed = True
 
-    
-    #place_text()
-    # main pygame display commands. must run at the end of each frame
-    #chance = get_bust_chance(player.hand)
-    #place_text(str(chance), display_width/2, display_height/2)
+    # Render the game
     pygame.display.update()
     clock.tick(60)
     
