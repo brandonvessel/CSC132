@@ -424,13 +424,15 @@ card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
 
 ##### Pygame Setup #####
 # Room values
-display_width = card_width * 10
-display_height = card_height * player_count
+#display_width = card_width * 10
+#display_height = card_height * player_count
+display_width = 800     # pi display width
+display_height = 480    # pi display height
 room_width = display_width      # just in case we decide to use these names later
 room_height = display_height    # just in case we decide to use these names later
 
 # Display
-gameDisplay = pygame.display.set_mode((display_width, display_height))
+gameDisplay = pygame.display.set_mode((display_width, display_height), pygame.FULLSCREEN)
 pygame.display.set_caption('Gambling.. But With Math')
 
 # Background colors
@@ -444,7 +446,7 @@ end_duration = 5 # seconds to display the end/victory message
 
 
 ###########################################
-###############GPIO setup##################
+############## GPIO setup #################
 ###########################################
 buttons = [17, 16, 13]
 RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
