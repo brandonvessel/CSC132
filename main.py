@@ -558,6 +558,10 @@ while not crashed:
             step = "initialization"
 
 
+    ##########################
+    #### END OF GAME CODE ####
+    ##########################
+
     #### DISPLAY SPRITES AND SCORES ####
     #### Print Player Cards ####
     y = 0
@@ -567,13 +571,6 @@ while not crashed:
             place_card(x, y, card.image)
             x += card_width
         y += card_height
-    #print step
-
-    #win(players[0])
-
-    ##########################
-    #### END OF GAME CODE ####
-    ##########################
 
     #### Print Dealer Cards ####
     x = display_width - card_width
