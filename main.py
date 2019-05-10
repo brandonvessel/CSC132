@@ -387,7 +387,6 @@ def render_cards():
         place_card(x, 0, card_back)
     pygame.display.update()
     clock.tick(60)
-    gameDisplay.fill(green)
 
 
 ############################################
