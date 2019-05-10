@@ -10,6 +10,7 @@ pygame.init()
 ################# CLASSES ##################
 ############################################
 class Player(object):
+    # Player object
     def __init__(self, number):
         # List of cards in hand
         self.hand = []
@@ -55,6 +56,7 @@ class Player(object):
 
 
 class Stack:
+    # The deck in the form of a Stack object
     def __init__(self):
         # List of cards
         self.cards = []
@@ -490,7 +492,8 @@ while not crashed:
         print "Deck shuffled"
 
         # Determine card backs
-        card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
+        #card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
+        card_back = pygame.image.load("./sprites/cards/tech_back.png")
         card_back = pygame.transform.scale(card_back, (card_width, card_height))
 
         # Set 2 cards in each players hand
