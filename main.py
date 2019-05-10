@@ -480,6 +480,9 @@ while not crashed:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 crashed = True
+                GPIO.cleanup()
+                pygame.quit()
+                quit()
 
 
     ###################
