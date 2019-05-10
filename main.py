@@ -246,15 +246,6 @@ def hit(self):
 	# Output: none
 	# Purpose: takes the player's hand and adds a card to it. Detects a win/lose scenario and reacts accordingly.
 	self.hand.append(deck.pop())
-	
-
-'''
-def lose():
-	# Input: player object
-	# Output: none
-	# Purpose: removes a player from the game, if there is only one player left, win(last player)
-    pass
-'''
 
 
 def win(winners):
