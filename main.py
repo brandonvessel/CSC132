@@ -6,16 +6,11 @@ from time import sleep, time
 # Initialize pygame
 pygame.init()
 
-# Card values
-card_width, card_height = 70, 106
-card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
-card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
-card_back = pygame.transform.scale(card_back, (card_width, card_height))
-
 ############################################
 ################# CLASSES ##################
 ############################################
 class Player(object):
+    # Player object
     def __init__(self, number):
         # List of cards in hand
         self.hand = []
@@ -61,6 +56,7 @@ class Player(object):
 
 
 class Stack:
+    # The deck in the form of a Stack object
     def __init__(self):
         # List of cards
         self.cards = []
@@ -265,15 +261,6 @@ def hit(self):
 	# Output: none
 	# Purpose: takes the player's hand and adds a card to it. Detects a win/lose scenario and reacts accordingly.
 	self.hand.append(deck.pop())
-	
-
-'''
-def lose():
-	# Input: player object
-	# Output: none
-	# Purpose: removes a player from the game, if there is only one player left, win(last player)
-    pass
-'''
 
 
 def win(winners):
@@ -410,8 +397,9 @@ def place_text(text, x, y):
 
 
 def render_cards():
-    # Render the dealer drawing cards
-    gameDisplay.fill(green)
+    #### Render the dealer drawing cards
+    place_card(0,0,background_image)
+
     #### Print Player Cards ####
     y = 0
     for player in players:
@@ -430,7 +418,6 @@ def render_cards():
         place_card(x, 0, card_back)
     pygame.display.update()
     clock.tick(60)
-    gameDisplay.fill(green)
 
 
 ############################################
@@ -453,21 +440,27 @@ dealer = Dealer()
 # Make deck as a stack object
 deck = Stack()
 
+# Card values
+card_width, card_height = 70, 106
+card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
 
 ##### Pygame Setup #####
 # Room values
-display_width = card_width * 10
-display_height = card_height * player_count
+#display_width = card_width * 10
+#display_height = card_height * player_count
+display_width = 800     # pi display width
+display_height = 480    # pi display height
 room_width = display_width      # just in case we decide to use these names later
 room_height = display_height    # just in case we decide to use these names later
 
 # Display
-gameDisplay = pygame.display.set_mode((display_width, display_height))
+gameDisplay = pygame.display.set_mode((display_width, display_height), pygame.FULLSCREEN)
 pygame.display.set_caption('Gambling.. But With Math')
 
-# Background colors
-black = (0,0,0)
-green = (0,100,0)
+# Background
+#black = (0,0,0)
+#green = (0,100,0)
+background_image = pygame.image.load("./sprites/background/background.png")
 
 # Engine
 clock = pygame.time.Clock()
@@ -476,7 +469,7 @@ end_duration = 5 # seconds to display the end/victory message
 
 
 ###########################################
-###############GPIO setup##################
+############## GPIO setup #################
 ###########################################
 buttons = [17, 16, 13]
 RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
@@ -501,7 +494,17 @@ GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 step = "initialization"
 while not crashed:
     # Background. Must run at the beginning of each frame.
-    gameDisplay.fill(green)
+    place_card(0,0,background_image)
+
+    # ESCAPE
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                crashed = True
+                GPIO.cleanup()
+                pygame.quit()
+                quit()
+
 
     ###################
     #### GAME CODE ####
@@ -509,10 +512,11 @@ while not crashed:
 
     if step == "initialization":
         #### Initialization ####
-        # beginning variables
+        # Beginning variables
         player_turn = 0
         winner = ""
-        # shuffle deck
+
+        # Shuffle deck
         deck.shuffle()
         deck.push(Card("Jack", "Spades", [10]))
         deck.push(Card("Jack", "Spades", [10]))
@@ -524,8 +528,13 @@ while not crashed:
         deck.push(Card("Jack", "Spades", [10]))
         
         print "Deck shuffled"
-        
-        # set 2 cards in each players hand
+
+        # Determine card backs
+        #card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
+        card_back = pygame.image.load("./sprites/cards/tech_back.png")
+        card_back = pygame.transform.scale(card_back, (card_width, card_height))
+
+        # Set 2 cards in each players hand
         for player in players:
             hit(player)
             hit(player)
@@ -533,7 +542,7 @@ while not crashed:
             for card in player.hand:
                 print "Player: {} Card: {}".format(player, card)
         
-        # dealer "only gets 1 card." 1 card is added during the dealer's turn
+        # Dealer "only gets 1 card." 1 card is added during the dealer's turn
         hit(dealer)
         step = "player_input"
         # LEDs are initially off
@@ -542,7 +551,6 @@ while not crashed:
         RGB3.off()
         
     if step == "player_input":
-        
         #### Player Input ####
         player = players[player_turn]
         led = RGB_LEDS[player_turn]
@@ -603,6 +611,10 @@ while not crashed:
             step = "initialization"
 
 
+    ##########################
+    #### END OF GAME CODE ####
+    ##########################
+
     #### DISPLAY SPRITES AND SCORES ####
     #### Print Player Cards ####
     y = 0
@@ -612,13 +624,6 @@ while not crashed:
             place_card(x, y, card.image)
             x += card_width
         y += card_height
-    #print step
-
-    #win(players[0])
-
-    ##########################
-    #### END OF GAME CODE ####
-    ##########################
 
     #### Print Dealer Cards ####
     x = display_width - card_width
@@ -634,11 +639,7 @@ while not crashed:
         if event.type == pygame.QUIT:
             crashed = True
 
-    
-    #place_text()
-    # main pygame display commands. must run at the end of each frame
-    #chance = get_bust_chance(player.hand)
-    #place_text(str(chance), display_width/2, display_height/2)
+    # Render the game
     pygame.display.update()
     clock.tick(60)
     
