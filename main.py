@@ -517,16 +517,7 @@ while not crashed:
         winner = ""
 
         # Shuffle deck
-        deck.shuffle()
-        deck.push(Card("Jack", "Spades", [10]))
-        deck.push(Card("Jack", "Spades", [10]))
-        deck.push(Card("Jack", "Spades", [10]))
-        deck.push(Card("Jack", "Spades", [10]))
-        deck.push(Card("Jack", "Spades", [10]))
-        deck.push(Card("Jack", "Spades", [10]))
-        deck.push(Card("Jack", "Spades", [10]))
-        deck.push(Card("Jack", "Spades", [10]))
-        
+        deck.shuffle()        
         print "Deck shuffled"
 
         # Determine card backs
