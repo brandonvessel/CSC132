@@ -423,19 +423,6 @@ def render_cards():
 ############################################
 ############## INITIALIZATION ##############
 ############################################
-##### Player Initialization ####
-players = []
-player_count = 3
-
-# Put player objects into players[]
-for i in range(player_count):
-    # add a player until player count is met
-    players.append(Player(i+1))
-
-# Create dealer #
-dealer = Dealer()
-
-
 ##### Deck initialization ####
 # Make deck as a stack object
 deck = Stack()
@@ -491,7 +478,7 @@ GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 ################### Main ###################
 ############################################
 ##### Run Game ####
-step = "initialization"
+step = "main_menu"
 while not crashed:
     # Background. Must run at the beginning of each frame.
     place_card(0,0,background_image)
@@ -500,10 +487,57 @@ while not crashed:
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                crashed = True
-                GPIO.cleanup()
-                pygame.quit()
-                quit()
+                step = "main_menu"
+
+
+    ###################
+    #### Main Menu ####
+    ###################
+
+    if step == "main_menu":
+        # General play button (Top Menu)
+        if HITTHEBUTTON:
+            step = "main_menu_2"
+        
+        if HIT QUIT BUTTON:
+            crashed = True
+            GPIO.cleanup()
+            pygame.quit()
+            quit()
+    
+    if step == "main_menu_2":
+        # Player Management
+        if HIT PLAYER BUTTON 1:
+            player_count = 1
+            
+        if HIT PLAYER BUTTON 2:
+            player_count = 2
+
+        if HIT PLAYER BUTTON 3:
+            player_count = 3
+
+        if HIT PLAY BUTTON:
+            ##### Player Initialization ####
+            players = []
+            player_count = 3
+
+            # Put player objects into players[]
+            for i in range(player_count):
+                # add a player until player count is met
+                players.append(Player(i+1))
+
+            # Create dealer #
+            dealer = Dealer()
+            step = "main_menu_3"
+        
+    if step == "main_menu_3":
+        # Game Options
+
+
+
+        if HIT PLAY BUTTON:
+            # Starts the game
+            step = "initialization"
 
 
     ###################
