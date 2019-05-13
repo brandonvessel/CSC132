@@ -592,14 +592,18 @@ while not crashed:
         player = players[player_turn]
         led = RGB_LEDS[player_turn]
 
+        # Revive all the players that suck
+        if(money[player_turn] == 0):
+            money[player_turn] = 1000
+
         # Regulate bets
         if(bets[player_turn] > money[player_turn]):
             bets[player_turn] -= 1000
         
-        # current player led is blue
+        # Current player led is blue
         led.blue()
 
-        ## HIT ##
+        ## BET MORE ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} bet".format(player))
             if(bets[player_turn] < money[player_turn]):
@@ -609,28 +613,32 @@ while not crashed:
             sleep(0.5)
             led.blue()
         
-        ## STAY ##
+        ## STOP BETTING ##
         if (GPIO.input(buttons[1]) == GPIO.HIGH):
-            print("Player {} stayed".format(player))
-            led.off()
+            print("Player {} finished betting".format(player))
+            led.green()
             player_turn += 1
             sleep(1)
             
-        ## GET BUST CHANCE ##
+        ## GO DOWN IN BET ##
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
-            if(bet != 0):
-                bets[player_turn] +=  1000
+            if(bet != 1000):
+                print("Player {} decreased their bet".format(player))
+                bets[player_turn] -=  1000
         
         # Determing if all players have gone and move forward.
         if(player_turn == len(players)):
-                print("All players have gone.\nIt's the dealer's turn")
-                step = "dealer_turn"
+                print("All players have better")
+                for led in RGB_LEDS:
+                    led.off()
+                step = "player_input"
                 player_turn = 0
 
     #### Player Turn ####
     if step == "player_input":
         player = players[player_turn]
         led = RGB_LEDS[player_turn]
+
         # current player led is blue
         led.blue()
         
