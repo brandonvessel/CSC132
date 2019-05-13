@@ -389,6 +389,9 @@ def place_card(x, y, image):
         
 
 def place_text(text, x, y):
+    # Input: text, x and y coordinates
+    # Output: places text on the specified location
+    # Purpose: pygame function to place text on the screen
     pygame.font.init()
     myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
@@ -397,13 +400,14 @@ def place_text(text, x, y):
 
 
 def render_cards():
-    #### Render the dealer drawing cards
+    # Render the cards on the table
+    # Background image
     place_card(0,0,background_image)
 
     #### Print Player Cards ####
     y = 0
     for player in players:
-        x = 0
+        x = card_width
         for card in player.hand:
             place_card(x, y, card.image)
             x += card_width
@@ -519,12 +523,17 @@ while not crashed:
         if HIT PLAY BUTTON:
             ##### Player Initialization ####
             players = []
-            player_count = 3
 
             # Put player objects into players[]
             for i in range(player_count):
                 # add a player until player count is met
                 players.append(Player(i+1))
+            
+            # Initialize player money
+            money = [5000, 5000, 5000]
+
+            # Initialize bets
+            bets = [0,0,0]
 
             # Create dealer #
             dealer = Dealer()
@@ -569,14 +578,57 @@ while not crashed:
         
         # Dealer "only gets 1 card." 1 card is added during the dealer's turn
         hit(dealer)
-        step = "player_input"
+
         # LEDs are initially off
         RGB1.off()
         RGB2.off()
         RGB3.off()
+
+        # Change step
+        step = "betting"
+
+    #### Player Betting ####
+    if step == "betting":
+        player = players[player_turn]
+        led = RGB_LEDS[player_turn]
+
+        # Regulate bets
+        if(bets[player_turn] > money[player_turn]):
+            bets[player_turn] -= 1000
         
+        # current player led is blue
+        led.blue()
+
+        ## HIT ##
+        if (GPIO.input(buttons[0]) == GPIO.HIGH):
+            print("Player {} bet".format(player))
+            if(bets[player_turn] < money[player_turn]):
+                bets[player_turn] +=  1000
+            else:
+                led.red()
+            sleep(0.5)
+            led.blue()
+        
+        ## STAY ##
+        if (GPIO.input(buttons[1]) == GPIO.HIGH):
+            print("Player {} stayed".format(player))
+            led.off()
+            player_turn += 1
+            sleep(1)
+            
+        ## GET BUST CHANCE ##
+        if (GPIO.input(buttons[2]) == GPIO.HIGH):
+            if(bet != 0):
+                bets[player_turn] +=  1000
+        
+        # Determing if all players have gone and move forward.
+        if(player_turn == len(players)):
+                print("All players have gone.\nIt's the dealer's turn")
+                step = "dealer_turn"
+                player_turn = 0
+
+    #### Player Turn ####
     if step == "player_input":
-        #### Player Input ####
         player = players[player_turn]
         led = RGB_LEDS[player_turn]
         # current player led is blue
@@ -616,6 +668,7 @@ while not crashed:
                 print("All players have gone.\nIt's the dealer's turn")
                 step = "dealer_turn"
 
+
     #### Dealer Turn ####
     if step == "dealer_turn":
         # winner is the return value of dealer_turn()
@@ -642,23 +695,7 @@ while not crashed:
 
     #### DISPLAY SPRITES AND SCORES ####
     #### Print Player Cards ####
-    y = 0
-    for player in players:
-        x = 0
-        for card in player.hand:
-            place_card(x, y, card.image)
-            x += card_width
-        y += card_height
-
-    #### Print Dealer Cards ####
-    x = display_width - card_width
-    for card in dealer.hand:
-        place_card(x, 0, card.image)
-        x -= card_width
-    if(step == "player_input"):
-        place_card(x, 0, card_back)
-    
-
+    render_cards()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
