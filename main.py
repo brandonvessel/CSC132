@@ -412,6 +412,12 @@ def render_cards():
             place_card(x, y, card.image)
             x += card_width
         y += card_height
+    
+    #### Turn Indicator ####
+    if(step == "player_input"):
+        x = 0
+        y = card_height * player_turn
+        place_card(x, y, turn_indicator)
 
     #### Print Dealer Cards ####
     x = display_width - card_width
@@ -420,6 +426,21 @@ def render_cards():
         x -= card_width
     if(step == "player_input"):
         place_card(x, 0, card_back)
+    pygame.display.update()
+    clock.tick(60)
+
+def render_bets():
+    # Render the bets on the table
+    # Background image
+    place_card(0,0,background_image)
+
+    #### Print Player Bets ####
+    global bets
+    global money
+    y = 0
+    for print_index in range(0, player_count):
+        place_text(x, y, "Money: {}\nBet: {}".format(money[print_index], bets[player_count]))
+        y += card_height
     pygame.display.update()
     clock.tick(60)
 
@@ -446,7 +467,10 @@ room_height = display_height    # just in case we decide to use these names late
 
 # Display
 gameDisplay = pygame.display.set_mode((display_width, display_height), pygame.FULLSCREEN)
-pygame.display.set_caption('Gambling.. But With Math')
+pygame.display.set_caption('Gambling... But With Math')
+
+# Turn Indicator
+turn_indicator = pygame.image.load("./sprites/ui/turn_indicator.png")
 
 # Background
 #black = (0,0,0)
@@ -629,6 +653,7 @@ while not crashed:
         # Determing if all players have gone and move forward.
         if(player_turn == len(players)):
                 print("All players have better")
+                # Turn off LEDs
                 for led in RGB_LEDS:
                     led.off()
                 step = "player_input"
@@ -703,7 +728,10 @@ while not crashed:
 
     #### DISPLAY SPRITES AND SCORES ####
     #### Print Player Cards ####
-    render_cards()
+    if(step == "betting"):
+        render_bets()
+    else:
+        render_cards()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
