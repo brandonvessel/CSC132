@@ -439,8 +439,10 @@ def render_bets():
     global money
     y = 0
     for print_index in range(0, player_count):
-        place_text("Money: {}\nBet: {}".format(money[print_index], bets[player_count]), x, y)
-        y += card_height
+        place_text("Money: {}".format(money[print_index]), x, y)
+        y += card_height/2.0
+        place_text("Bet: {}".format(bets[player_count]), x, y)
+        y += card_height/2.0
     pygame.display.update()
     clock.tick(60)
 
