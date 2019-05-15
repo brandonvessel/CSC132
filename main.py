@@ -377,7 +377,15 @@ def dealer_turn():
             print "losing so hit"
             hit(dealer)
             print "score after: {}".format(get_score(dealer.hand))
+        place_card(0,0,background_image)
         render_cards()
+        pygame.display.update()
+        clock.tick(60)
+        rand = randint(2)
+        if(rand == 0):
+            sound_draw_card1.play()
+        elif(rand == 1):
+            sound_draw_card2.play()
         sleep(1.5)
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
@@ -778,10 +786,10 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            rand = random.randint(2)
-            if(i == 0):
+            rand = randint(2)
+            if(rand == 0):
                 sound_draw_card1.play()
-            elif(i == 1):
+            elif(rand == 1):
                 sound_draw_card2.play()
             hit(player)
             sleep(1)
