@@ -361,7 +361,7 @@ def dealer_turn():
             losers = 0
             if(get_score(dealer.hand) > get_score(player.hand)):
                 losers+=1
-        if(losers >= floor(len(players)/2.0):
+        if(losers >= floor(len(players)/2.0)):
            dealer_done = True
            break
 
