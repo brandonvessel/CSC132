@@ -585,12 +585,16 @@ buttons = [17, 16, 13]
 RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
+RGB_LEDS = []
 
-RGB1 = RGB(1,18,19,20)
-RGB2 = RGB(2,21,22,23)
-RGB3 = RGB(3,24,25,26)
+for i in range(3):# needs to be changed to player count########################################################################
+    RGB_LEDS.append(RGB((i+1),RGB_LED_INDICES[(3*i)+18],RGB_LED_INDICES[(3*i)+19],RGB_LED_INDICES[(3*i)+18]))
 
-RGB_LEDS = [RGB1, RGB2, RGB3]
+#RGB1 = RGB(1,18,19,20)
+#RGB2 = RGB(2,21,22,23)
+#RGB3 = RGB(3,24,25,26)
+
+#RGB_LEDS = [RGB1, RGB2, RGB3]
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(RGB_LED_INDICES, GPIO.OUT)
@@ -701,9 +705,8 @@ while not crashed:
         hit(dealer)
 
         # LEDs are initially off
-        RGB1.off()
-        RGB2.off()
-        RGB3.off()
+        for led in RGB_LEDS:
+            led.off()
 
         # Change step
         if(gamerule_betting):
