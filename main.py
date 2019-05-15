@@ -501,6 +501,7 @@ def render_bets():
     #### Print Player Bets ####
     global bets
     global money
+    x = 0
     y = 0
     for print_index in range(0, player_count):
         place_text("Money: {}".format(money[print_index]), x, y)
