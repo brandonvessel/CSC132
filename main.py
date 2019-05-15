@@ -420,12 +420,15 @@ def render_cards():
         place_card(x, y, turn_indicator)
 
     #### Print Dealer Cards ####
-    x = display_width - card_width
-    for card in dealer.hand:
-        place_card(x, 0, card.image)
-        x -= card_width
-    if(step == "player_input"):
-        place_card(x, 0, card_back)
+    if(step != "betting"):
+        x = display_width - card_width
+        for card in dealer.hand:
+            place_card(x, 0, card.image)
+            x -= card_width
+        if(step == "player_input"):
+            place_card(x, 0, card_back)
+
+    # Display Update
     pygame.display.update()
     clock.tick(60)
 
