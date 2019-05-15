@@ -5,7 +5,7 @@ from time import sleep, time
 
 # Initialize pygame
 pygame.init()
-
+blue = (0, 0, 255)
 ############################################
 ################# CLASSES ##################
 ############################################
@@ -398,6 +398,23 @@ def place_text(text, x, y):
     textsurface = myfont.render(text, False, (0,0,0))
     gameDisplay.blit(textsurface,(x,y))
 
+def make_button(x, y, width, height, color, action = None):
+    # creates a button using an x and y coordinate, witdth, height, color, and
+    # 
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+
+    if x+width > mouse[0] > x and y+height > mouse[1] > y:
+        pygame.draw.rect(gameDisplay, ac,(x,y,width,height))
+
+        if (click[0] == 1 and action != None):
+            action()
+            sleep(0.5)
+    else:
+        pygame.draw.rect(gameDisplay, ic,(x,y,width,height))
+    pygame.display.update()
+    
+
 
 def render_cards():
     # Render the cards on the table
@@ -512,6 +529,7 @@ step = "main_menu"
 while not crashed:
     # Background. Must run at the beginning of each frame.
     place_card(0,0,background_image)
+    make_button(display_width/2, display_height/2-100, blue, mainButtonPressed)
 
     # ESCAPE
     for event in pygame.event.get():
