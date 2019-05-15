@@ -421,7 +421,6 @@ def place_text(text, x, y):
 
 def make_button(x, y, ac, ic = blue, action = None, width = 100, height = 50):
     # creates a button using an x and y coordinate, witdth, height, color, and
-    #
     
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
@@ -471,8 +470,6 @@ def initialize():
 
 def render_cards():
     # Render the cards on the table
-    # Background image
-
     #### Print Player Cards ####
     y = 0
     global players
@@ -501,8 +498,6 @@ def render_cards():
 
 def render_bets():
     # Render the bets on the table
-    # Background image
-
     #### Print Player Bets ####
     global bets
     global money
@@ -618,26 +613,13 @@ while not crashed:
     if step == "main_menu":
         players = []
         button_pressed = False
+
+        # Start button
         make_button(display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
-        print step
         
-        #make_button(display_width/2-100, display_height/2-100, blue, mainButtonPressed)
-        #button_made = False
-        
-        #if not button_made:
-            
-        # General play button (Top Menu)
-        #if HITTHEBUTTON:
-        #    step = "main_menu_2"
-        
-        #if HIT QUIT BUTTON:
-         #   crashed = True
-          #  GPIO.cleanup()
-           # pygame.quit()
-            #quit()
+        # Quit button
         make_button(display_width/2+100, display_height/2-100, blue, black, quitGame)
-            #pygame.display.update
-            #button_made = True
+
     
     if step == "main_menu_2":
         #### Player Management ####
@@ -650,6 +632,7 @@ while not crashed:
         # Change to 3 player
         make_button(display_width/2+100, display_height/2+100, black, blue, playerCount3)
 
+        # Next button
         make_button(display_width/2, display_height/2-200, blue, black, playerInit)
         if step == "playerInit":
             ##### Player Initialization ####
