@@ -88,6 +88,13 @@ class Stack:
         # Returns how many cards are in the deck
         return len(self.cards)
 
+    def avgval(self):
+        # Returns the average value of the cards in the deck
+        mysum = 0
+        for card in self.cards:
+            mysum += card.value[0]
+        return mysum
+
     
     def shuffle(self):
         # Input: none
@@ -544,6 +551,25 @@ clock = pygame.time.Clock()
 crashed = False
 end_duration = 5 # seconds to display the end/victory message
 
+# Game Opions
+gamerule_hide_cards = False
+gamerule_betting = False
+gamerule_charlie = False
+gamerule_bust_chance = True
+gamerule_guess_card = False
+
+
+#### Sounds ####
+# Play Music
+pygame.mixer.music.load('./sounds/music/background_music.ogg')
+pygame.mixer.music.play(-1)
+
+# Sound Effects
+sound_draw_card = pygame.mixer.Sound('./sounds/effects/draw_card.ogg')
+sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
+sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
+sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.wav')
+
 
 ###########################################
 ############## GPIO setup #################
@@ -611,18 +637,15 @@ while not crashed:
             #button_made = True
     
     if step == "main_menu_2":
+        #### Player Management ####
+        # Change to 1 player
         make_button(display_width/2-100, display_height/2+100, black, blue, playerCount1)
-        # Player Management
-        #if HIT PLAYER BUTTON 1:
-        #    player_count = 1
         
+        # Change to 2 player
         make_button(display_width/2, display_height/2+100, black, blue, playerCount2)
-        #if HIT PLAYER BUTTON 2:
-        #    player_count = 2
 
+        # Change to 3 player
         make_button(display_width/2+100, display_height/2+100, black, blue, playerCount3)
-        #if HIT PLAYER BUTTON 3:
-        #    player_count = 3
 
         make_button(display_width/2, display_height/2-200, blue, black, playerInit)
         if step == "playerInit":
@@ -690,7 +713,10 @@ while not crashed:
         RGB3.off()
 
         # Change step
-        step = "betting"
+        if(gamerule_betting):
+            step = "betting"
+        else:
+            step = "player_input"
 
     #### Player Betting ####
     if step == "betting":
@@ -727,13 +753,13 @@ while not crashed:
             
         ## GO DOWN IN BET ##
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
-            if(bet != 1000):
+            if(bets[player_turn] != 1000):
                 print("Player {} decreased their bet".format(player))
                 bets[player_turn] -=  1000
         
         # Determing if all players have gone and move forward.
         if(player_turn == len(players)):
-                print("All players have better")
+                print("All players have betted")
                 # Turn off LEDs
                 for led in RGB_LEDS:
                     led.off()
@@ -748,10 +774,16 @@ while not crashed:
         # current player led is blue
         led.blue()
         
+        # if player has blackjack, continue to next player
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
             led.green()
             player_turn += 1
+
+        # gamerule_charlie check
+        if(gamerule_charlie):
+            if(len(player.hand) > 4):
+                player_turn += 1
 
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
@@ -774,8 +806,23 @@ while not crashed:
             
         ## GET BUST CHANCE ##
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
-            chance = get_bust_chance(player.hand)
-            place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
+            if(gamerule_bust_chance and not gamerule_guess_card):
+                # just bustchance
+                chance = get_bust_chance(player.hand)
+                place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
+
+            elif(gamerule_guess_card and not gamerule_bust_chance):
+                # just guess_card
+                card = deck.avgval()
+                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+
+            elif(gamerule_guess_card and gamerule_bust_chance):
+                # bust chance and guess card
+                chance = get_bust_chance(player.hand)
+                place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
+                card = deck.avgval()
+                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+
         
         # Determing if all players have gone and move forward.
         if(player_turn == len(players)):
