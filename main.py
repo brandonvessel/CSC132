@@ -488,7 +488,7 @@ room_width = display_width      # just in case we decide to use these names late
 room_height = display_height    # just in case we decide to use these names later
 
 # Display
-gameDisplay = pygame.display.set_mode((display_width, display_height), pygame.FULLSCREEN)
+gameDisplay = pygame.display.set_mode((display_width, display_height))#, pygame.FULLSCREEN)
 pygame.display.set_caption('Gambling... But With Math')
 
 # Turn Indicator
