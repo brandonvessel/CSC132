@@ -587,8 +587,9 @@ RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LEDS = []
 
-for i in range(3):# needs to be changed to player count########################################################################
-    RGB_LEDS.append(RGB((i+1),RGB_LED_INDICES[(3*i)+18],RGB_LED_INDICES[(3*i)+19],RGB_LED_INDICES[(3*i)+18]))
+for i in range(2):# needs to be changed to player count########################################################################
+    RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
+
 
 #RGB1 = RGB(1,18,19,20)
 #RGB2 = RGB(2,21,22,23)
