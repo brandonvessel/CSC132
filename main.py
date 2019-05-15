@@ -625,18 +625,15 @@ while not crashed:
             #button_made = True
     
     if step == "main_menu_2":
+        #### Player Management ####
+        # Change to 1 player
         make_button(display_width/2-100, display_height/2+100, black, blue, playerCount1)
-        # Player Management
-        #if HIT PLAYER BUTTON 1:
-        #    player_count = 1
         
+        # Change to 2 player
         make_button(display_width/2, display_height/2+100, black, blue, playerCount2)
-        #if HIT PLAYER BUTTON 2:
-        #    player_count = 2
 
+        # Change to 3 player
         make_button(display_width/2+100, display_height/2+100, black, blue, playerCount3)
-        #if HIT PLAYER BUTTON 3:
-        #    player_count = 3
 
         make_button(display_width/2, display_height/2-200, blue, black, playerInit)
         if step == "playerInit":
@@ -744,13 +741,13 @@ while not crashed:
             
         ## GO DOWN IN BET ##
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
-            if(bet != 1000):
+            if(bets[player_turn] != 1000):
                 print("Player {} decreased their bet".format(player))
                 bets[player_turn] -=  1000
         
         # Determing if all players have gone and move forward.
         if(player_turn == len(players)):
-                print("All players have better")
+                print("All players have betted")
                 # Turn off LEDs
                 for led in RGB_LEDS:
                     led.off()
