@@ -562,12 +562,13 @@ pygame.mixer.music.load('./sounds/music/background_music.ogg')
 pygame.mixer.music.play(-1)
 
 # Sound Effects
-sound_draw_card = pygame.mixer.Sound('./sounds/effects/draw_card.ogg')
+sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
+sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
-sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.wav')
+sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.ogg')
 sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
-sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.wav')
+sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
 
 
 ###########################################
@@ -777,7 +778,11 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            sound_draw_card.play()
+            rand = random.randint(2)
+            if(i == 0):
+                sound_draw_card1.play()
+            elif(i == 1):
+                sound_draw_card2.play()
             hit(player)
             sleep(1)
 
