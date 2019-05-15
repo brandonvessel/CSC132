@@ -458,9 +458,9 @@ def playerCount3():
     global player_count
     player_count = 3
 
-def playerInit():
+def player_init():
     global step
-    step = "playerInit"
+    step = "player_init"
 
 def initialize():
     global step
@@ -505,7 +505,7 @@ def render_bets():
     for print_index in range(0, player_count):
         place_text("Money: {}".format(money[print_index]), x, y)
         y += card_height/2.0
-        place_text("Bet: {}".format(bets[player_count]), x, y)
+        place_text("Bet: {}".format(bets[print_index]), x, y)
         y += card_height/2.0
 
 
@@ -633,8 +633,9 @@ while not crashed:
         make_button(display_width/2+100, display_height/2+100, black, blue, playerCount3)
 
         # Next button
-        make_button(display_width/2, display_height/2-200, blue, black, playerInit)
-        if step == "playerInit":
+        make_button(display_width/2, display_height/2-200, blue, black, player_init)
+        
+        if step == "player_init":
             ##### Player Initialization ####
             players = []
 
