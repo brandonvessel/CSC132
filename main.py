@@ -2,6 +2,7 @@ from random import randint
 import pygame
 import RPi.GPIO as GPIO
 from time import sleep, time
+from math import floor
 
 # Initialize pygame
 pygame.init()
@@ -318,7 +319,7 @@ def dealer_turn():
     # note: dealer will always hit if the player has a higher score and sometimes hit when tied
     global dealer
     global players
-
+    dealer_done = False
     # dealer only has 1 card, hit
     hit(dealer)
     render_cards()
@@ -344,9 +345,20 @@ def dealer_turn():
             highest = get_score(player.hand)
     
     player = highest_player
-    
 
+    # if the dealer is beating enough players it will stop
     while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
+        if(dealer_done):
+            break
+        for player in players:
+            losers = 0
+            if(get_score(dealer.hand) > get_score(player.hand)):
+                losers+=1
+        if(losers >= floor(len(players)/2.0):
+           dealer_done = True
+           break
+
+        
         if(get_score(dealer.hand) == get_score(player.hand)):
             if(get_bust_chance(dealer.hand) < 50):
                 print "tied but hit"
