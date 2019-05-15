@@ -6,6 +6,7 @@ from time import sleep, time
 # Initialize pygame
 pygame.init()
 blue = (0, 0, 255)
+black = (0,0,0)
 ############################################
 ################# CLASSES ##################
 ############################################
@@ -398,11 +399,14 @@ def place_text(text, x, y):
     textsurface = myfont.render(text, False, (0,0,0))
     gameDisplay.blit(textsurface,(x,y))
 
-def make_button(x, y, width, height, color, action = None):
+
+def make_button(x, y, ac, ic = blue, action = None, width = 100, height = 50):
     # creates a button using an x and y coordinate, witdth, height, color, and
-    # 
+    #
+    
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
+
 
     if x+width > mouse[0] > x and y+height > mouse[1] > y:
         pygame.draw.rect(gameDisplay, ac,(x,y,width,height))
@@ -412,17 +416,47 @@ def make_button(x, y, width, height, color, action = None):
             sleep(0.5)
     else:
         pygame.draw.rect(gameDisplay, ic,(x,y,width,height))
-    pygame.display.update()
+
+
+def mainButtonPressed():
+    global step
+    step = "main_menu_2"
+    print "derp"
+
+def quitGame():
+    global crashed
+    crashed = True
+    GPIO.cleanup()
+    pygame.quit()
+    quit()
+
+def playerCount1():
+    global player_count
+    player_count = 1
+def playerCount2():
+    global player_count
+    player_count = 2 
+def playerCount3():
+    global player_count
+    player_count = 3
+
+def playerInit():
+    global step
+    step = "playerInit"
+
+def initialize():
+    global step
+    step = "initialization"
     
 
 
 def render_cards():
     # Render the cards on the table
     # Background image
-    place_card(0,0,background_image)
 
     #### Print Player Cards ####
     y = 0
+    global players
     for player in players:
         x = card_width
         for card in player.hand:
@@ -445,14 +479,10 @@ def render_cards():
         if(step == "player_input"):
             place_card(x, 0, card_back)
 
-    # Display Update
-    pygame.display.update()
-    clock.tick(60)
 
 def render_bets():
     # Render the bets on the table
     # Background image
-    place_card(0,0,background_image)
 
     #### Print Player Bets ####
     global bets
@@ -463,8 +493,6 @@ def render_bets():
         y += card_height/2.0
         place_text("Bet: {}".format(bets[player_count]), x, y)
         y += card_height/2.0
-    pygame.display.update()
-    clock.tick(60)
 
 
 ############################################
@@ -529,10 +557,11 @@ GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
 ############################################
 ##### Run Game ####
 step = "main_menu"
+dealer = Dealer()
 while not crashed:
     # Background. Must run at the beginning of each frame.
     place_card(0,0,background_image)
-    make_button(display_width/2, display_height/2-100, blue, mainButtonPressed)
+    
 
     # ESCAPE
     for event in pygame.event.get():
@@ -546,28 +575,45 @@ while not crashed:
     ###################
 
     if step == "main_menu":
-        # General play button (Top Menu)
-        if HITTHEBUTTON:
-            step = "main_menu_2"
+        players = []
+        button_pressed = False
+        make_button(display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
+        print step
         
-        if HIT QUIT BUTTON:
-            crashed = True
-            GPIO.cleanup()
-            pygame.quit()
-            quit()
+        #make_button(display_width/2-100, display_height/2-100, blue, mainButtonPressed)
+        #button_made = False
+        
+        #if not button_made:
+            
+        # General play button (Top Menu)
+        #if HITTHEBUTTON:
+        #    step = "main_menu_2"
+        
+        #if HIT QUIT BUTTON:
+         #   crashed = True
+          #  GPIO.cleanup()
+           # pygame.quit()
+            #quit()
+        make_button(display_width/2+100, display_height/2-100, blue, black, quitGame)
+            #pygame.display.update
+            #button_made = True
     
     if step == "main_menu_2":
+        make_button(display_width/2-100, display_height/2+100, black, blue, playerCount1)
         # Player Management
-        if HIT PLAYER BUTTON 1:
-            player_count = 1
-            
-        if HIT PLAYER BUTTON 2:
-            player_count = 2
+        #if HIT PLAYER BUTTON 1:
+        #    player_count = 1
+        
+        make_button(display_width/2, display_height/2+100, black, blue, playerCount2)
+        #if HIT PLAYER BUTTON 2:
+        #    player_count = 2
 
-        if HIT PLAYER BUTTON 3:
-            player_count = 3
+        make_button(display_width/2+100, display_height/2+100, black, blue, playerCount3)
+        #if HIT PLAYER BUTTON 3:
+        #    player_count = 3
 
-        if HIT PLAY BUTTON:
+        make_button(display_width/2, display_height/2-200, blue, black, playerInit)
+        if step == "playerInit":
             ##### Player Initialization ####
             players = []
 
@@ -590,10 +636,10 @@ while not crashed:
         # Game Options
 
 
-
-        if HIT PLAY BUTTON:
+        make_button(display_width-100, display_height-100, blue, black, initialize)
+        #if HIT PLAY BUTTON:
             # Starts the game
-            step = "initialization"
+         #   step = "initialization"
 
 
     ###################
