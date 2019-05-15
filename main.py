@@ -528,6 +528,7 @@ pygame.display.set_caption('Gambling... But With Math')
 
 # Turn Indicator
 turn_indicator = pygame.image.load("./sprites/ui/turn_indicator.png")
+turn_indicator = pygame.transform.scale(turn_indicator, (card_width, card_height))
 
 # Background
 #black = (0,0,0)
@@ -557,6 +558,8 @@ sound_draw_card = pygame.mixer.Sound('./sounds/effects/draw_card.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
 sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.wav')
+sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
+sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.wav')
 
 
 ###########################################
@@ -658,11 +661,8 @@ while not crashed:
     if step == "main_menu_3":
         # Game Options
 
-
+        # Play button
         make_button(display_width-100, display_height-100, blue, black, initialize)
-        #if HIT PLAY BUTTON:
-            # Starts the game
-         #   step = "initialization"
 
 
     ###################
@@ -727,6 +727,7 @@ while not crashed:
             print("Player {} bet".format(player))
             if(bets[player_turn] < money[player_turn]):
                 bets[player_turn] +=  1000
+                sound_chip_clink.play()
             else:
                 led.red()
             sleep(0.5)
@@ -744,6 +745,8 @@ while not crashed:
             if(bets[player_turn] != 1000):
                 print("Player {} decreased their bet".format(player))
                 bets[player_turn] -=  1000
+                sound_chip_clink.play()
+                sleep(0.5)
         
         # Determing if all players have gone and move forward.
         if(player_turn == len(players)):
@@ -765,6 +768,7 @@ while not crashed:
         # if player has blackjack, continue to next player
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
+            sound_yes_yes.play()
             led.green()
             player_turn += 1
 
@@ -776,12 +780,14 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
+            sound_draw_card.play()
             hit(player)
             sleep(1)
 
             # change the player turn if the player busted
             if (get_score(player.hand) > 21):
                 print("Player {} BUSTED!\n Next player".format(player))
+                sound_sad_aw.play()
                 led.red()
                 player_turn += 1
         
