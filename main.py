@@ -381,7 +381,7 @@ def dealer_turn():
         render_cards()
         pygame.display.update()
         clock.tick(60)
-        rand = randint(2)
+        rand = randint(0,2)
         if(rand == 0):
             sound_draw_card1.play()
         elif(rand == 1):
@@ -547,9 +547,8 @@ turn_indicator = pygame.image.load("./sprites/ui/turn_indicator.png")
 turn_indicator = pygame.transform.scale(turn_indicator, (card_width, card_height))
 
 # Background
-#black = (0,0,0)
-#green = (0,100,0)
 background_image = pygame.image.load("./sprites/background/background.png")
+menu_image = pygame.image.load("./sprites/background/background_blank.png")
 
 # Engine
 clock = pygame.time.Clock()
@@ -686,8 +685,8 @@ while not crashed:
         print "Deck shuffled"
 
         # Determine card backs
-        #card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
-        card_back = pygame.image.load("./sprites/cards/tech_back.png")
+        card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
+        #card_back = pygame.image.load("./sprites/cards/tech_back.png")
         card_back = pygame.transform.scale(card_back, (card_width, card_height))
 
         # Set 2 cards in each players hand
@@ -786,7 +785,7 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            rand = randint(2)
+            rand = randint(0, 2)
             if(rand == 0):
                 sound_draw_card1.play()
             elif(rand == 1):
