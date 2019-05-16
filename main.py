@@ -312,7 +312,7 @@ def win():
             y += 50
     else:
         for player in players:
-            if get_score(player.hand) >= get_score(dealer.hand):
+            if(get_score(player.hand) >= get_score(dealer.hand) and (get_score(player.hand) < 22)):
                 beat_dealer = True
 
         if(beat_dealer and (bets_tallied == False)):
@@ -389,7 +389,7 @@ def dealer_turn():
 
     # if the dealer is beating enough players it will stop
     while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
-        if(get_score(dealer) > 21):
+        if(get_score(dealer.hand) > 21):
             break
         if(dealer_done):
             break
@@ -562,7 +562,7 @@ def render_bets():
     x = 0
     y = 0
     for print_index in range(0, player_count):
-        place_text("Money: {}".format(players[print_index].money), x, y)
+        place_text("Chips: {}".format(players[print_index].money), x, y)
         y += card_height/2.0
         place_text("Bet: {}".format(players[print_index].bet), x, y)
         y += card_height/2.0
@@ -645,7 +645,8 @@ sound_victory = [sound_heyey, sound_we, sound_john_cena, sound_guiles, sound_swe
 
 # Loss
 sound_trololol = pygame.mixer.Sound('./sounds/effects/trololol.ogg')
-sound_loss = [sound_trololol]
+sound_bustin = pygame.mixer.Sound('./sounds/effects/bustin.ogg')
+sound_loss = [sound_trololol, sound_bustin]
 
 
 ###########################################
