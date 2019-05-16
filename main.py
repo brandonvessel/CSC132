@@ -206,13 +206,6 @@ class RGB():
         GPIO.output(self.b,True)
         self.state = "blue"
         
-    def purple(self):                   # purple means tied with dealer
-        # Turn on blue and red pin, Turn off other pins.
-        GPIO.output(self.r,True)
-        GPIO.output(self.g,False)
-        GPIO.output(self.b,True)
-        self.state = "purple"
-        
     def off(self):
         # Turn off all pins.
         GPIO.output(self.r,False)
@@ -310,27 +303,28 @@ def win(winners):
         place_text("The dealer is the winner", x, y)
         
     elif (winners[len(winners) -1] == "tie"):
-        winners.pop()
-        for winner in winners:
+        print_winners = winners[0:len(winners)-1]
+        for winner in print_winners:
             for led in RGB_LEDS:
-                if(led.number==winner.number):
-                    led.purple()
+                if(led.number == winner.number):
+                    led.blue()
             for led in RGB_LEDS:
-                if(led.state!="purple"):
+                if(led.state!="blue"):
                     led.red()
             place_text("The dealer tied with Player {}".format(winner.number), x, y)
             y += 50
     
-    for winner in winners:
-        for led in RGB_LEDS:
-            if(led.number==winner.number):
-                led.green()
-        for led in RGB_LEDS:
-            if(led.state!="green"):
-                led.red()
-            
-        place_text("Player {} is a winner".format(winner.number), x, y)
-        y += 50
+    else:
+        for winner in winners:
+            for led in RGB_LEDS:
+                if(led.number==winner.number):
+                    led.green()
+            for led in RGB_LEDS:
+                if(led.state!="green"):
+                    led.red()
+                
+            place_text("Player {} won".format(winner.number), x, y)
+            y += 50
 
 
 def dealer_turn():
@@ -580,7 +574,7 @@ deck = Stack()
 
 # Card values
 card_width, card_height = 70, 106
-card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
+card_backs = ["blue", "green", "gray", "blue", "red", "yellow"]
 
 ##### Pygame Setup #####
 # Room values
