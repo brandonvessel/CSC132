@@ -99,7 +99,7 @@ class Stack:
         mysum = 0
         for card in self.cards:
             mysum += card.value[0]
-        return mysum/float(len(self.cards))
+        return round(mysum/float(len(self.cards)), 2)
 
     
     def shuffle(self):
@@ -470,10 +470,12 @@ def make_button(msg, x, y, ac, ic, action = None, width = 175, height = 50):
     gameDisplay.blit(textSurf, textRect)
         
 
+#play button on the main menu, advances to next screen
 def mainButtonPressed():
     global step
     step = "main_menu_2"
 
+#quit button on main menu
 def quitGame():
     global crashed
     crashed = True
@@ -481,11 +483,10 @@ def quitGame():
     pygame.quit()
     quit()
 
+#this toggle the player count to whichever button is pressed
 def playerCount1():
     global player_count
     player_count = 1
-    #make_button("1 Player", display_width/2-150, display_height/2, black, black, None, 150)
-    print "new button made"
     print player_count
 def playerCount2():
     global player_count
@@ -496,6 +497,7 @@ def playerCount3():
     player_count = 3
     print player_count
 
+#confirms the player count
 def player_init():
     try:
         temp = player_count
@@ -504,14 +506,15 @@ def player_init():
     global step
     step = "player_init"
 
+#starts game
 def initialize():
     global step
     step = "initialization"
+
+#toggles the game options 
 def gamerule_hide_cardsButton():
     global gamerule_hide_cards
-    #if gamerule_hide_cards = Tr
     gamerule_hide_cards = not gamerule_hide_cards
-    print gamerule_hide_cards
 def gamerule_bettingButton():
     global gamerule_betting
     gamerule_betting = not gamerule_betting
@@ -731,33 +734,36 @@ while not crashed:
         button_pressed = False
 
         # Start button
-        make_button("start", display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
+        make_button("start", display_width/2-50, display_height/2-100, blue, black, mainButtonPressed)
         
         # Quit button
-        make_button("quit", display_width/2+100, display_height/2-100, blue, black, quitGame)
+        make_button("quit", display_width/2-50, display_height/2, blue, black, quitGame)
 
     
     if step == "main_menu_2":
         global player_count
         #### Player Management ####
-        # Change to 1 player
             
-        make_button("1 Player", display_width/2-200, display_height/2+100, black, blue, playerCount1, 150)
+       # Change to 1 player
         if (player_count == 1):   
-            make_button("1 Player", display_width/2-200, display_height/2+100, black, black, None, 150)
+            make_button("1 Player", 50, display_height/2+100, blue, blue, None)
+        else:
+            make_button("1 Player", 50, display_height/2+100, blue, black, playerCount1)
         
         # Change to 2 player
-        make_button("2 Players", display_width/2, display_height/2+100, black, blue, playerCount2, 150)
         if (player_count == 2):   
-            make_button("2 Players", display_width/2, display_height/2+100, black, black, None, 150)
+            make_button("2 Players", display_width/2-75, display_height/2+100, blue, blue, None)
+        else:
+             make_button("2 Players", display_width/2-75, display_height/2+100, blue, black, playerCount2)
 
         # Change to 3 player
-        make_button("3 Players", display_width/2+200, display_height/2+100, black, blue, playerCount3, 150)
         if (player_count == 3):   
-            make_button("3 Players", display_width/2+200, display_height/2+100, black, black, None, 150)
+            make_button("3 Players", display_width/2+200, display_height/2+100, blue, blue, None)
+        else:
+             make_button("3 Players", display_width/2+200, display_height/2+100, blue, black, playerCount3)
 
         # Next button
-        make_button("NEXT", display_width/2, display_height/2-200, blue, black, player_init)
+        make_button("NEXT", display_width/2-75, display_height/2-200, blue, black, player_init)
         
         if step == "player_init":
             ##### Player Initialization ####
@@ -775,26 +781,31 @@ while not crashed:
     if step == "main_menu_3":
         # Game Options
        
+        #toggles the hide cards rule
         if (gamerule_hide_cards == True):
             make_button("Hide cards", 100, 100, blue, blue, gamerule_hide_cardsButton, 175)
         else:
              make_button("Hide cards", 100, 100, blue, black, gamerule_hide_cardsButton, 175)
 
+        #toggles the betting rule
         if (gamerule_betting == True):
             make_button("Betting", 100, 175, blue, blue, gamerule_bettingButton, 175)
         else:
             make_button("Betting", 100, 175, blue, black, gamerule_bettingButton, 175)
 
+        #toggles the charlie rule
         if (gamerule_charlie == True):
             make_button("Charlie", 100, 250, blue, blue, gamerule_charlieButton, 175)
         else:
             make_button("Charlie", 100, 250, blue, black, gamerule_charlieButton, 175)
 
+        #toggles the bust chance rule
         if (gamerule_bust_chance == True):
             make_button("Bust chance", 300, 100, blue, blue, gamerule_bust_chanceButton, 175)
         else:
             make_button("Bust chance", 300, 100, blue, black, gamerule_bust_chanceButton, 175)
 
+        #toggles the guess card rule
         if (gamerule_guess_card == True):
             make_button("Guess card", 300, 175, blue, blue, gamerule_guess_cardButton, 175)
         else:
@@ -947,19 +958,19 @@ while not crashed:
             if(gamerule_bust_chance and not gamerule_guess_card):
                 # just bustchance
                 chance = get_bust_chance(player.hand)
-                place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
+                place_text("Your bust chance is {}".format(str(chance)), display_width-100, display_height-100)
 
             elif(gamerule_guess_card and not gamerule_bust_chance):
                 # just guess_card
                 chance = deck.avgval()
-                place_text("You will probably get {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably get {}".format(chance), display_width-100, display_height-100)
 
             elif(gamerule_guess_card and gamerule_bust_chance):
                 # bust chance and guess card
                 chance = get_bust_chance(player.hand)
-                place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
+                place_text("Your bust chance is {}".format(str(chance)), display_width-100, display_height-100)
                 chance = deck.avgval()
-                place_text("You will probably get {}".format(chance), display_width/2, display_height/2 + 20)
+                place_text("You will probably get {}".format(chance), display_width-100, display_height-50)
 
         
         # Determing if all players have gone and move forward.
