@@ -21,6 +21,8 @@ class Player(object):
         # List of cards in hand
         self.hand = []
         self.number = number
+        self.money = 5000
+        self.bet = 0
 
 
     def get_score(self):
@@ -387,10 +389,7 @@ def dealer_turn():
         pygame.display.update()
         clock.tick(60)
         rand = randint(0,2)
-        if(rand == 0):
-            sound_draw_card1.play()
-        elif(rand == 1):
-            sound_draw_card2.play()
+        sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
         sleep(1.5)
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
@@ -418,7 +417,7 @@ def place_card(x, y, image):
     # Input: x and y coordinates, path to image
     # Output: places a card on the specified location
     # Purpose: pygame function to place cards on the screen
-        gameDisplay.blit(image, (x,y))
+    gameDisplay.blit(image, (x,y))
         
 
 def place_text(text, x, y):
@@ -458,10 +457,7 @@ def make_button(msg, x, y, ac, ic, action = None, width = 175, height = 50):
     textSurf, textRect = text_objects(msg, smallText)
     textRect.center = ((x+(width/2)), (y+(height/2)))
     gameDisplay.blit(textSurf, textRect)
-
-    
         
-
 
 def mainButtonPressed():
     global step
@@ -551,8 +547,6 @@ def render_cards():
 def render_bets():
     # Render the bets on the table
     #### Print Player Bets ####
-    global bets
-    global money
     x = 0
     y = 0
     for print_index in range(0, player_count):
@@ -613,13 +607,21 @@ pygame.mixer.music.load('./sounds/music/background_music.ogg')
 pygame.mixer.music.play(-1)
 
 # Sound Effects
-sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
-sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
 sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.ogg')
-sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
 sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
+
+# Draw Card
+sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
+sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
+sound_draw_card = [sound_draw_card1, sound_draw_card2]
+
+# Blackjack
+sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
+sound_wilson_wow = pygame.mixer.Sound('./sounds/effects/wilson_wow.ogg')
+sound_wally_wow = pygame.mixer.Sound('./sounds/effects/wally_wow.ogg')
+sound_blackjack = [sound_yes_yes, sound_wilson_wow, sound_wally_wow]
 
 
 ###########################################
@@ -845,7 +847,7 @@ while not crashed:
         # if player has blackjack, continue to next player
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
-            sound_yes_yes.play()
+            sound_blackjack[randint(0,len(sound_blackjack)-1)].play()
             led.green()
             player_turn += 1
 
@@ -857,11 +859,7 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            rand = randint(0, 2)
-            if(rand == 0):
-                sound_draw_card1.play()
-            elif(rand == 1):
-                sound_draw_card2.play()
+            sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
             hit(player)
             sleep(1)
 
