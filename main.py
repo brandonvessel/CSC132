@@ -281,6 +281,7 @@ def win():
     global deck
     global RGB_LEDS
     global players
+    global bets_tallied
     x = 0
     y = 0
     while (y < display_height):
@@ -301,40 +302,45 @@ def win():
             if get_score(player.hand) < 22:
                 place_text("Player {} won".format(player.number), x, y)
                 RGB_LEDS[player.number].green()
-                player.money += player.bet
+                if(bets_tallied == False):
+                    player.money += player.bet
             else:
                 place_text("Player {} lost".format(player.number), x, y)
-                player.money -= player.bet
-            y += 50
-        return
-
-    for player in players:
-        if get_score(player.hand) > get_score(dealer.hand):
-            beat_dealer = True
-
-    if(beat_dealer):
-        for player in players:
-            if get_score(player.hand) > get_score(dealer.hand):
-                # that player won
-                place_text("Player {} won".format(player.number), x, y)
-                RGB_LEDS[player.number].green()
-                player.money += player.bet
-
-            elif get_score(player.hand) == get_score(dealer.hand):
-                # that player tied
-                place_text("Player {} tied the dealer".format(player.number), x, y)
-                RGB_LEDS[player.number].blue()
-            
-            else:
-                # that player lost
-                place_text("Player {} lost".format(player.number), x, y)
-                player.money -= player.bet
+                RGB_LEDS[player.number].red()
+                if(bets_tallied == False):
+                    player.money -= player.bet
             y += 50
     else:
-        # Players lose
-        for led in RGB_LEDS:
-            led.red()
-        place_text("The dealer is the winner", x, y)        
+        for player in players:
+            if get_score(player.hand) >= get_score(dealer.hand):
+                beat_dealer = True
+
+        if(beat_dealer):
+            for player in players:
+                if get_score(player.hand) > get_score(dealer.hand):
+                    # that player won
+                    place_text("Player {} won".format(player.number), x, y)
+                    RGB_LEDS[player.number].green()
+                    if(bets_tallied == False):
+                        player.money += player.bet
+
+                elif get_score(player.hand) == get_score(dealer.hand):
+                    # that player tied
+                    place_text("Player {} tied the dealer".format(player.number), x, y)
+                    RGB_LEDS[player.number].blue()
+                
+                else:
+                    # that player lost
+                    place_text("Player {} lost".format(player.number), x, y)
+                    if(bets_tallied == False):
+                        player.money -= player.bet
+                y += 50
+        else:
+            # Players lose
+            for led in RGB_LEDS:
+                led.red()
+            place_text("The dealer is the winner", x, y)   
+    bets_tallied = True 
 
 
 def dealer_turn():
@@ -619,11 +625,18 @@ sound_draw_card = [sound_draw_card1, sound_draw_card2]
 sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
 sound_wilson_wow = pygame.mixer.Sound('./sounds/effects/wilson_wow.ogg')
 sound_wally_wow = pygame.mixer.Sound('./sounds/effects/wally_wow.ogg')
-HEYYEYAAEYAAAEYAEYAA.ogg
-guiles_theme.ogg
-trololol.ogg
-we_are_number_wow.ogg
 sound_blackjack = [sound_yes_yes, sound_wilson_wow, sound_wally_wow]
+
+# Victory
+sound_heyey = pygame.mixer.Sound('./sounds/effects/HEYYEYAAEYAAAEYAEYAA.ogg')
+sound_we = pygame.mixer.Sound('./sounds/effects/we_are_number_wow.ogg')
+sound_john_cena = pygame.mixer.Sound('./sounds/effects/john_cena.ogg')
+sound_guiles = pygame.mixer.Sound('./sounds/effects/guiles_theme.ogg')
+sound_victory = [sound_heyey, sound_we, sound_john_cena, sound_guiles, sound_victory]
+
+# Loss
+sound_trololol = pygame.mixer.Sound('./sounds/effects/trololol.ogg')
+sound_loss = [sound_trololol]
 
 
 ###########################################
@@ -753,6 +766,7 @@ while not crashed:
         # Beginning variables
         player_turn = 0
         winner = ""
+        bets_tallied = False
 
         RGB_LEDS = []
 
