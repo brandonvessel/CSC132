@@ -8,7 +8,6 @@ from math import floor
 pygame.init()
 blue = (0, 0, 255)
 black = (0,0,0)
-red = (255,0,0)
 ############################################
 ################# CLASSES ##################
 ############################################
@@ -191,19 +190,12 @@ class RGB():
         GPIO.output(self.b,False)
         self.state = "green"
         
-    def blue(self):                     # blue led means its the current players turn
+    def blue(self):                     # blue led means its the current players turn or tie
         # Turn on blue pin, Turn off other pins.
         GPIO.output(self.r,False)
         GPIO.output(self.g,False)
         GPIO.output(self.b,True)
         self.state = "blue"
-        
-    def purple(self):                   # purple means tied with dealer
-        # Turn on blue and red pin, Turn off other pins.
-        GPIO.output(self.r,True)
-        GPIO.output(self.g,False)
-        GPIO.output(self.b,True)
-        self.state = "purple"
         
     def off(self):
         # Turn off all pins.
@@ -297,27 +289,28 @@ def win(winners):
         place_text("The dealer is the winner", x, y)
         
     elif (winners[len(winners) -1] == "tie"):
-        winners.pop()
+        print_winners = winners[0:len(winners)-1]
+        for winner in print_winners:
+            for led in RGB_LEDS:
+                if(led.number==winner.number):
+                    led.blue()
+            for led in RGB_LEDS:
+                if(led.state!="blue"):
+                    led.red()
+
+            place_text("The dealer tied with Player {}".format(winner.number), x, y)
+            y += 50
+    else:
         for winner in winners:
             for led in RGB_LEDS:
                 if(led.number==winner.number):
-                    led.purple()
+                    led.green()
             for led in RGB_LEDS:
-                if(led.state!="purple"):
+                if(led.state!="green"):
                     led.red()
-            place_text("The dealer tied with Player {}".format(winner.number), x, y)
+                
+            place_text("Player {} is a winner".format(winner.number), x, y)
             y += 50
-    
-    for winner in winners:
-        for led in RGB_LEDS:
-            if(led.number==winner.number):
-                led.green()
-        for led in RGB_LEDS:
-            if(led.state!="green"):
-                led.red()
-            
-        place_text("Player {} is a winner".format(winner.number), x, y)
-        y += 50
 
 
 def dealer_turn():
@@ -357,14 +350,18 @@ def dealer_turn():
     # if the dealer is beating enough players it will stop
     while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
         if(dealer_done):
-            break
+            if((get_bust_chance(dealer.hand) != 0) and len(dealer.hand) != 1):
+                break
         for player in players:
             losers = 0
             if(get_score(dealer.hand) > get_score(player.hand)):
                 losers+=1
+            if(get_score(player.hand) > 21):
+                losers+=1
         if(losers >= floor(len(players)/2.0)):
-           dealer_done = True
-           break
+            print "dealer is beating {} players so stop".format(losers);
+            dealer_done = True
+            break
 
         
         if(get_score(dealer.hand) == get_score(player.hand)):
@@ -396,8 +393,8 @@ def dealer_turn():
         for player in players:
             if (get_score(player.hand) == highest):
                 winners.append(player)
-            winners.append("tie")
-            return "tied dealer...", winners
+        winners.append("tie")
+        return "tied dealer...", winners
                 
     else:
         score = 0
@@ -428,38 +425,27 @@ def place_text(text, x, y):
     gameDisplay.blit(textsurface,(x,y))
 
 
-def text_objects(text, font):
-    textSurface = font.render(text, True, red)
-    return textSurface, textSurface.get_rect()
-
-def make_button(msg, x, y, ac, ic = blue, action = None, width = 100, height = 50):
+def make_button(x, y, ac, ic = blue, action = None, width = 100, height = 50):
     # creates a button using an x and y coordinate, witdth, height, color, and
     
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
-    
-    #checks to see is the mouse is over a button
+
+
     if x+width > mouse[0] > x and y+height > mouse[1] > y:
         pygame.draw.rect(gameDisplay, ac,(x,y,width,height))
 
-        #runs a function when the button is clicked
         if (click[0] == 1 and action != None):
             action()
             sleep(0.5)
     else:
         pygame.draw.rect(gameDisplay, ic,(x,y,width,height))
 
-    #text is put on button
-    smallText = pygame.font.SysFont("comicsansms",40)
-    textSurf, textRect = text_objects(msg, smallText)
-    textRect.center = ((x+(width/2)), (y+(height/2)))
-    gameDisplay.blit(textSurf, textRect)
-
 
 def mainButtonPressed():
     global step
     step = "main_menu_2"
-    #print "derp"
+    print "derp"
 
 def quitGame():
     global crashed
@@ -560,8 +546,7 @@ turn_indicator = pygame.transform.scale(turn_indicator, (card_width, card_height
 
 # Background
 background_image = pygame.image.load("./sprites/background/background.png")
-logo_image = pygame.image.load("./sprites/ui/logo.png")
-logo_image = pygame.transform.scale(logo_image, (646, 74))
+menu_image = pygame.image.load("./sprites/background/background_blank.png")
 
 # Engine
 clock = pygame.time.Clock()
@@ -600,8 +585,9 @@ RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LEDS = []
 
-for i in range(2):# needs to be changed to player count########################################################################
+for i in range(3):# needs to be changed to player count########################################################################
     RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
+    
 
 
 #RGB1 = RGB(1,18,19,20)
@@ -638,30 +624,29 @@ while not crashed:
     ###################
 
     if step == "main_menu":
-        place_card(75,0,logo_image)
         players = []
         button_pressed = False
 
         # Start button
-        make_button("start", display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
+        make_button(display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
         
         # Quit button
-        make_button("quit", display_width/2+100, display_height/2-100, blue, black, quitGame)
+        make_button(display_width/2+100, display_height/2-100, blue, black, quitGame)
 
     
     if step == "main_menu_2":
         #### Player Management ####
         # Change to 1 player
-        make_button("1 Player", display_width/2-150, display_height/2+100, black, blue, playerCount1, 150)
+        make_button(display_width/2-100, display_height/2+100, black, blue, playerCount1)
         
         # Change to 2 player
-        make_button("2 Players", display_width/2, display_height/2+100, black, blue, playerCount2, 150)
+        make_button(display_width/2, display_height/2+100, black, blue, playerCount2)
 
         # Change to 3 player
-        make_button("3 Players", display_width/2+150, display_height/2+100, black, blue, playerCount3, 150)
+        make_button(display_width/2+100, display_height/2+100, black, blue, playerCount3)
 
         # Next button
-        make_button("NEXT", display_width/2, display_height/2-200, blue, black, player_init)
+        make_button(display_width/2, display_height/2-200, blue, black, player_init)
         
         if step == "player_init":
             ##### Player Initialization ####
@@ -686,7 +671,7 @@ while not crashed:
         # Game Options
 
         # Play button
-        make_button("PLAY", display_width-100, display_height-100, blue, black, initialize)
+        make_button(display_width-100, display_height-100, blue, black, initialize)
 
 
     ###################
