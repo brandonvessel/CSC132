@@ -137,7 +137,7 @@ class Stack:
                 random_index = randint(0, len(self.cards) - 1)
                 self.cards[i], self.cards[random_index] = self.cards[random_index], self.cards[i]
         '''
-        self.cards.shuffle()
+        shuffle(self.cards)
 
 
     def print_deck(self):
