@@ -383,7 +383,7 @@ def dealer_turn():
     player = highest_player
 
     # if the dealer is beating enough players it will stop
-    while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
+    while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21) and (get_score(dealer.hand) < 22)):
         if(dealer_done):
             break
         for player in players:
@@ -526,7 +526,7 @@ def render_cards():
     for player in players:
         x = card_width
         for card in player.hand:
-            if(gamerule_hide_cards and player.number - 1 < player_turn):
+            if(gamerule_hide_cards and player.number - 1 >= player_turn):
                 place_card(x, y, card_back)
             else:
                 place_card(x, y, card.image)
