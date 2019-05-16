@@ -190,19 +190,12 @@ class RGB():
         GPIO.output(self.b,False)
         self.state = "green"
         
-    def blue(self):                     # blue led means its the current players turn
+    def blue(self):                     # blue led means its the current players turn or tie
         # Turn on blue pin, Turn off other pins.
         GPIO.output(self.r,False)
         GPIO.output(self.g,False)
         GPIO.output(self.b,True)
         self.state = "blue"
-        
-    def purple(self):                   # purple means tied with dealer
-        # Turn on blue and red pin, Turn off other pins.
-        GPIO.output(self.r,True)
-        GPIO.output(self.g,False)
-        GPIO.output(self.b,True)
-        self.state = "purple"
         
     def off(self):
         # Turn off all pins.
@@ -305,21 +298,20 @@ def win(winners):
         for winner in print_winners:
             for led in RGB_LEDS:
                 if(led.number == winner.number):
-                    led.purple()
+                    led.blue()
             for led in RGB_LEDS:
-                if(led.state != "purple"):
+                if(led.state!="blue"):
                     led.red()
+
             place_text("The dealer tied with Player {}".format(winner.number), x, y)
             y += 50
-        return
-    
     else:
         for winner in winners:
             for led in RGB_LEDS:
                 if(led.number==winner.number):
                     led.green()
             for led in RGB_LEDS:
-                if(led.state != "green"):
+                if(led.state!="green"):
                     led.red()
                 
             place_text("Player {} won".format(winner.number), x, y)
@@ -363,14 +355,18 @@ def dealer_turn():
     # if the dealer is beating enough players it will stop
     while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
         if(dealer_done):
-            break
+            if((get_bust_chance(dealer.hand) != 0) and len(dealer.hand) != 1):
+                break
         for player in players:
             losers = 0
             if(get_score(dealer.hand) > get_score(player.hand)):
                 losers+=1
+            if(get_score(player.hand) > 21):
+                losers+=1
         if(losers >= floor(len(players)/2.0)):
-           dealer_done = True
-           break
+            print "dealer is beating {} players so stop".format(losers);
+            dealer_done = True
+            break
 
         
         if(get_score(dealer.hand) == get_score(player.hand)):
@@ -615,8 +611,9 @@ RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LEDS = []
 
-for i in range(2):# needs to be changed to player count########################################################################
+for i in range(3):# needs to be changed to player count########################################################################
     RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
+    
 
 
 #RGB1 = RGB(1,18,19,20)
