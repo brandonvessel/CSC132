@@ -21,6 +21,8 @@ class Player(object):
         # List of cards in hand
         self.hand = []
         self.number = number
+        self.money = 5000
+        self.bet = 0
 
 
     def get_score(self):
@@ -227,11 +229,16 @@ def get_score(hand):
     hasAce=False
     aceAdded=False
 
+    # Check for charlie
+    if(gamerule_charlie):
+        if(len(hand) == 5):
+            return 21
+
     # Iterate through cards, look for Ace
     for card in hand:
-            if(card.name=="Ace"):
-                scores.append(0)
-                hasAce=True
+        if(card.name=="Ace"):
+            scores.append(0)
+            hasAce=True
 
     if(hasAce):
         for card in hand:
@@ -385,11 +392,7 @@ def dealer_turn():
         render_cards()
         pygame.display.update()
         clock.tick(60)
-        rand = randint(0,2)
-        if(rand == 0):
-            sound_draw_card1.play()
-        elif(rand == 1):
-            sound_draw_card2.play()
+        sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
         sleep(1.5)
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
@@ -570,8 +573,6 @@ card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
 
 ##### Pygame Setup #####
 # Room values
-#display_width = card_width * 10
-#display_height = card_height * player_count
 display_width = 800     # pi display width
 display_height = 480    # pi display height
 room_width = display_width      # just in case we decide to use these names later
@@ -598,9 +599,9 @@ end_duration = 5 # seconds to display the end/victory message
 # Game Opions
 gamerule_hide_cards = False
 gamerule_betting = False
-gamerule_charlie = False
+gamerule_charlie = True
 gamerule_bust_chance = True
-gamerule_guess_card = False
+gamerule_guess_card = True
 
 
 #### Sounds ####
@@ -609,13 +610,21 @@ pygame.mixer.music.load('./sounds/music/background_music.ogg')
 pygame.mixer.music.play(-1)
 
 # Sound Effects
-sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
-sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
 sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.ogg')
-sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
 sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
+
+# Draw Card
+sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
+sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
+sound_draw_card = [sound_draw_card1, sound_draw_card2]
+
+# Blackjack
+sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
+sound_wilson_wow = pygame.mixer.Sound('./sounds/effects/wilson_wow.ogg')
+sound_wally_wow = pygame.mixer.Sound('./sounds/effects/wally_wow.ogg')
+sound_blackjack = [sound_yes_yes, sound_wilson_wow, sound_wally_wow]
 
 
 ###########################################
@@ -626,16 +635,6 @@ RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LEDS = []
-
-for i in range(2):# needs to be changed to player count########################################################################
-    RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
-
-
-#RGB1 = RGB(1,18,19,20)
-#RGB2 = RGB(2,21,22,23)
-#RGB3 = RGB(3,24,25,26)
-
-#RGB_LEDS = [RGB1, RGB2, RGB3]
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(RGB_LED_INDICES, GPIO.OUT)
@@ -761,6 +760,11 @@ while not crashed:
         # Dealer "only gets 1 card." 1 card is added during the dealer's turn
         hit(dealer)
 
+        # create and add an LED for each player 
+        RGB_LEDS = [] 
+        for i in range(player_count):# needs to be changed to player count
+            RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
+
         # LEDs are initially off
         for led in RGB_LEDS:
             led.off()
@@ -833,7 +837,7 @@ while not crashed:
         # if player has blackjack, continue to next player
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
-            sound_yes_yes.play()
+            sound_blackjack[randint(0,len(sound_blackjack)-1)].play()
             led.green()
             player_turn += 1
 
@@ -845,11 +849,7 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            rand = randint(0, 2)
-            if(rand == 0):
-                sound_draw_card1.play()
-            elif(rand == 1):
-                sound_draw_card2.play()
+            sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
             hit(player)
             sleep(1)
 
@@ -877,14 +877,14 @@ while not crashed:
             elif(gamerule_guess_card and not gamerule_bust_chance):
                 # just guess_card
                 card = deck.avgval()
-                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably get {}".format(chance), display_width/2, display_height/2)
 
             elif(gamerule_guess_card and gamerule_bust_chance):
                 # bust chance and guess card
                 chance = get_bust_chance(player.hand)
                 place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
                 card = deck.avgval()
-                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably get {}".format(chance), display_width/2, display_height/2 + 20)
 
         
         # Determing if all players have gone and move forward.
