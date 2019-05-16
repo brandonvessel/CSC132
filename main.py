@@ -507,7 +507,10 @@ def render_cards():
     for player in players:
         x = card_width
         for card in player.hand:
-            place_card(x, y, card.image)
+            if(gamerule_hide_cards and player.num > player_turn):
+                place_card(x, y, card_back)
+            else:
+                place_card(x, y, card.image)
             x += card_width
         y += card_height
     
