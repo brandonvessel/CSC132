@@ -297,18 +297,18 @@ def win():
     beat_dealer = False
 
     for player in players:
-        if get_score(player) > get_score(dealer):
+        if get_score(player.hand) > get_score(dealer.hand):
             beat_dealer = True
 
     if(beat_dealer):
         for player in players:
-            if get_score(player) > get_score(dealer):
+            if get_score(player.hand) > get_score(dealer.hand):
                 # that player won
                 place_text("Player {} won".format(player.number), x, y)
                 RGB_LEDS[player.number].green()
                 player.money += player.bet
 
-            elif get_score(player) == get_score(dealer):
+            elif get_score(player.hand) == get_score(dealer.hand):
                 # that player tied
                 place_text("Player {} tied the dealer".format(player.number), x, y)
                 RGB_LEDS[player.number].blue()
