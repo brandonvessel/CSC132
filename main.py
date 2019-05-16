@@ -459,7 +459,6 @@ def make_button(msg, x, y, ac, ic = blue, action = None, width = 100, height = 5
 def mainButtonPressed():
     global step
     step = "main_menu_2"
-    #print "derp"
 
 def quitGame():
     global crashed
@@ -578,7 +577,7 @@ gamerule_hide_cards = False
 gamerule_betting = False
 gamerule_charlie = False
 gamerule_bust_chance = True
-gamerule_guess_card = False
+gamerule_guess_card = True
 
 
 #### Sounds ####
@@ -643,6 +642,7 @@ while not crashed:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 step = "main_menu"
+                dealer = Dealer()
 
 
     ###################
@@ -849,14 +849,14 @@ while not crashed:
             elif(gamerule_guess_card and not gamerule_bust_chance):
                 # just guess_card
                 card = deck.avgval()
-                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably draw {}".format(chance), display_width/2, display_height/2)
 
             elif(gamerule_guess_card and gamerule_bust_chance):
                 # bust chance and guess card
                 chance = get_bust_chance(player.hand)
                 place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
                 card = deck.avgval()
-                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably draw {}".format(chance), display_width/2, display_height/2 + 20)
 
         
         # Determing if all players have gone and move forward.
