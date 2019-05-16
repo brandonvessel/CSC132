@@ -2,11 +2,13 @@ from random import randint
 import pygame
 import RPi.GPIO as GPIO
 from time import sleep, time
+from math import floor
 
 # Initialize pygame
 pygame.init()
 blue = (0, 0, 255)
 black = (0,0,0)
+red = (255,0,0)
 ############################################
 ################# CLASSES ##################
 ############################################
@@ -325,7 +327,7 @@ def dealer_turn():
     # note: dealer will always hit if the player has a higher score and sometimes hit when tied
     global dealer
     global players
-
+    dealer_done = False
     # dealer only has 1 card, hit
     hit(dealer)
     render_cards()
@@ -351,9 +353,20 @@ def dealer_turn():
             highest = get_score(player.hand)
     
     player = highest_player
-    
 
+    # if the dealer is beating enough players it will stop
     while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
+        if(dealer_done):
+            break
+        for player in players:
+            losers = 0
+            if(get_score(dealer.hand) > get_score(player.hand)):
+                losers+=1
+        if(losers >= floor(len(players)/2.0)):
+           dealer_done = True
+           break
+
+        
         if(get_score(dealer.hand) == get_score(player.hand)):
             if(get_bust_chance(dealer.hand) < 50):
                 print "tied but hit"
@@ -407,28 +420,38 @@ def place_text(text, x, y):
     gameDisplay.blit(textsurface,(x,y))
 
 
-def make_button(x, y, ac, ic = blue, action = None, width = 100, height = 50):
+def text_objects(text, font):
+    textSurface = font.render(text, True, red)
+    return textSurface, textSurface.get_rect()
+
+def make_button(msg, x, y, ac, ic = blue, action = None, width = 100, height = 50):
     # creates a button using an x and y coordinate, witdth, height, color, and
-    #
     
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
-
-
+    
+    #checks to see is the mouse is over a button
     if x+width > mouse[0] > x and y+height > mouse[1] > y:
         pygame.draw.rect(gameDisplay, ac,(x,y,width,height))
 
+        #runs a function when the button is clicked
         if (click[0] == 1 and action != None):
             action()
             sleep(0.5)
     else:
         pygame.draw.rect(gameDisplay, ic,(x,y,width,height))
 
+    #text is put on button
+    smallText = pygame.font.SysFont("comicsansms",40)
+    textSurf, textRect = text_objects(msg, smallText)
+    textRect.center = ((x+(width/2)), (y+(height/2)))
+    gameDisplay.blit(textSurf, textRect)
+
 
 def mainButtonPressed():
     global step
     step = "main_menu_2"
-    print "derp"
+    #print "derp"
 
 def quitGame():
     global crashed
@@ -447,9 +470,9 @@ def playerCount3():
     global player_count
     player_count = 3
 
-def playerInit():
+def player_init():
     global step
-    step = "playerInit"
+    step = "player_init"
 
 def initialize():
     global step
@@ -459,8 +482,6 @@ def initialize():
 
 def render_cards():
     # Render the cards on the table
-    # Background image
-
     #### Print Player Cards ####
     y = 0
     global players
@@ -489,16 +510,15 @@ def render_cards():
 
 def render_bets():
     # Render the bets on the table
-    # Background image
-
     #### Print Player Bets ####
     global bets
     global money
+    x = 0
     y = 0
     for print_index in range(0, player_count):
         place_text("Money: {}".format(money[print_index]), x, y)
         y += card_height/2.0
-        place_text("Bet: {}".format(bets[player_count]), x, y)
+        place_text("Bet: {}".format(bets[print_index]), x, y)
         y += card_height/2.0
 
 
@@ -528,11 +548,14 @@ pygame.display.set_caption('Gambling... But With Math')
 
 # Turn Indicator
 turn_indicator = pygame.image.load("./sprites/ui/turn_indicator.png")
+turn_indicator = pygame.transform.scale(turn_indicator, (card_width, card_height))
 
 # Background
 #black = (0,0,0)
 #green = (0,100,0)
 background_image = pygame.image.load("./sprites/background/background.png")
+logo_image = pygame.image.load("./sprites/ui/logo.png")
+logo_image = pygame.transform.scale(logo_image, (646, 74))
 
 # Engine
 clock = pygame.time.Clock()
@@ -557,6 +580,8 @@ sound_draw_card = pygame.mixer.Sound('./sounds/effects/draw_card.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
 sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.wav')
+sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
+sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.wav')
 
 
 ###########################################
@@ -601,45 +626,32 @@ while not crashed:
     ###################
 
     if step == "main_menu":
+        place_card(75,0,logo_image)
         players = []
         button_pressed = False
-        make_button(display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
-        print step
+
+        # Start button
+        make_button("start", display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
         
-        #make_button(display_width/2-100, display_height/2-100, blue, mainButtonPressed)
-        #button_made = False
-        
-        #if not button_made:
-            
-        # General play button (Top Menu)
-        #if HITTHEBUTTON:
-        #    step = "main_menu_2"
-        
-        #if HIT QUIT BUTTON:
-         #   crashed = True
-          #  GPIO.cleanup()
-           # pygame.quit()
-            #quit()
-        make_button(display_width/2+100, display_height/2-100, blue, black, quitGame)
-            #pygame.display.update
-            #button_made = True
+        # Quit button
+        make_button("quit", display_width/2+100, display_height/2-100, blue, black, quitGame)
+
     
     if step == "main_menu_2":
-        make_button(display_width/2-100, display_height/2+100, black, blue, playerCount1)
-        # Player Management
-        #if HIT PLAYER BUTTON 1:
-        #    player_count = 1
+        #### Player Management ####
+        # Change to 1 player
+        make_button("1 Player", display_width/2-150, display_height/2+100, black, blue, playerCount1, 150)
         
-        make_button(display_width/2, display_height/2+100, black, blue, playerCount2)
-        #if HIT PLAYER BUTTON 2:
-        #    player_count = 2
+        # Change to 2 player
+        make_button("2 Players", display_width/2, display_height/2+100, black, blue, playerCount2, 150)
 
-        make_button(display_width/2+100, display_height/2+100, black, blue, playerCount3)
-        #if HIT PLAYER BUTTON 3:
-        #    player_count = 3
+        # Change to 3 player
+        make_button("3 Players", display_width/2+150, display_height/2+100, black, blue, playerCount3, 150)
 
-        make_button(display_width/2, display_height/2-200, blue, black, playerInit)
-        if step == "playerInit":
+        # Next button
+        make_button("NEXT", display_width/2, display_height/2-200, blue, black, player_init)
+        
+        if step == "player_init":
             ##### Player Initialization ####
             players = []
 
@@ -661,11 +673,8 @@ while not crashed:
     if step == "main_menu_3":
         # Game Options
 
-
-        make_button(display_width-100, display_height-100, blue, black, initialize)
-        #if HIT PLAY BUTTON:
-            # Starts the game
-         #   step = "initialization"
+        # Play button
+        make_button("PLAY", display_width-100, display_height-100, blue, black, initialize)
 
 
     ###################
@@ -730,6 +739,7 @@ while not crashed:
             print("Player {} bet".format(player))
             if(bets[player_turn] < money[player_turn]):
                 bets[player_turn] +=  1000
+                sound_chip_clink.play()
             else:
                 led.red()
             sleep(0.5)
@@ -744,13 +754,15 @@ while not crashed:
             
         ## GO DOWN IN BET ##
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
-            if(bet != 1000):
+            if(bets[player_turn] != 1000):
                 print("Player {} decreased their bet".format(player))
                 bets[player_turn] -=  1000
+                sound_chip_clink.play()
+                sleep(0.5)
         
         # Determing if all players have gone and move forward.
         if(player_turn == len(players)):
-                print("All players have better")
+                print("All players have betted")
                 # Turn off LEDs
                 for led in RGB_LEDS:
                     led.off()
@@ -768,6 +780,7 @@ while not crashed:
         # if player has blackjack, continue to next player
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
+            sound_yes_yes.play()
             led.green()
             player_turn += 1
 
@@ -779,12 +792,14 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
+            sound_draw_card.play()
             hit(player)
             sleep(1)
 
             # change the player turn if the player busted
             if (get_score(player.hand) > 21):
                 print("Player {} BUSTED!\n Next player".format(player))
+                sound_sad_aw.play()
                 led.red()
                 player_turn += 1
         
