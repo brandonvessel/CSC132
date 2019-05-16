@@ -345,9 +345,19 @@ def win():
             # Players lose
             if(not bets_tallied):
                 sound_loss[randint(0,len(sound_loss)-1)].play()
+                for player in players:
+                    player.money -= player.bet
             for led in RGB_LEDS:
                 led.red()
-            place_text("The dealer is the winner", x, y)   
+            place_text("The dealer is the winner", x, y)
+
+    # Revive players
+    for player in players:
+        if player.money == 0:
+            player.money = 1000
+            player.bet = 1000
+
+    # Set boolean
     bets_tallied = True 
 
 
@@ -580,17 +590,17 @@ def render_bets():
         while(chips / 5000 >= 1):
             chips -= 5000
             place_card(x, y, kkkkk)
-            x += card_width
+            x += card_width / 2
         # 2k
         while(chips / 2000 >= 1):
             chips -= 2000
             place_card(x, y, kk)
-            x += card_width
+            x += card_width / 2
         # 1k
         while(chips / 1000 >= 1):
             chips -= 1000
             place_card(x, y, k)
-            x += card_width
+            x += card_width / 2
         
         y += card_width
         
@@ -616,7 +626,7 @@ room_width = display_width      # just in case we decide to use these names late
 room_height = display_height    # just in case we decide to use these names later
 
 # Display
-gameDisplay = pygame.display.set_mode((display_width, display_height))#, pygame.FULLSCREEN)
+gameDisplay = pygame.display.set_mode((display_width, display_height), pygame.FULLSCREEN)
 pygame.display.set_caption('Gambling... But With Math')
 
 # Turn Indicator
@@ -734,10 +744,10 @@ while not crashed:
         button_pressed = False
 
         # Start button
-        make_button("start", display_width/2-50, display_height/2-100, blue, black, mainButtonPressed)
+        make_button("Start", display_width/2-50, display_height/2-100, blue, black, mainButtonPressed)
         
         # Quit button
-        make_button("quit", display_width/2-50, display_height/2, blue, black, quitGame)
+        make_button("Quit", display_width/2-50, display_height/2, blue, black, quitGame)
 
     
     if step == "main_menu_2":
@@ -763,7 +773,7 @@ while not crashed:
              make_button("3 Players", display_width/2+200, display_height/2+100, blue, black, playerCount3)
 
         # Next button
-        make_button("NEXT", display_width/2-75, display_height/2-200, blue, black, player_init)
+        make_button("Next", display_width/2-75, display_height/2-200, blue, black, player_init)
         
         if step == "player_init":
             ##### Player Initialization ####
@@ -937,7 +947,7 @@ while not crashed:
             print("Player {} hit".format(player))
             sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
             hit(player)
-            sleep(1)
+            sleep(1.5)
 
             # change the player turn if the player busted
             if (get_score(player.hand) > 21):
@@ -958,19 +968,19 @@ while not crashed:
             if(gamerule_bust_chance and not gamerule_guess_card):
                 # just bustchance
                 chance = get_bust_chance(player.hand)
-                place_text("Your bust chance is {}".format(str(chance)), display_width-100, display_height-100)
+                place_text("Your bust chance is {}".format(str(chance)), display_width-350, display_height-100)
 
             elif(gamerule_guess_card and not gamerule_bust_chance):
                 # just guess_card
                 chance = deck.avgval()
-                place_text("You will probably get {}".format(chance), display_width-100, display_height-100)
+                place_text("You will probably get {}".format(chance), display_width-350, display_height-100)
 
             elif(gamerule_guess_card and gamerule_bust_chance):
                 # bust chance and guess card
                 chance = get_bust_chance(player.hand)
-                place_text("Your bust chance is {}".format(str(chance)), display_width-100, display_height-100)
+                place_text("Your bust chance is {}".format(str(chance)), display_width-350, display_height-100)
                 chance = deck.avgval()
-                place_text("You will probably get {}".format(chance), display_width-100, display_height-50)
+                place_text("You will probably get {}".format(chance), display_width-350, display_height-50)
 
         
         # Determing if all players have gone and move forward.
