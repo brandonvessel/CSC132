@@ -526,7 +526,7 @@ def render_cards():
     for player in players:
         x = card_width
         for card in player.hand:
-            if(gamerule_hide_cards and player.num > player_turn):
+            if(gamerule_hide_cards and player.number - 1 < player_turn):
                 place_card(x, y, card_back)
             else:
                 place_card(x, y, card.image)
@@ -927,10 +927,6 @@ while not crashed:
     if step == "dealer_turn":
         # winner is the return value of dealer_turn()
         dealer_turn()
-        print("\n\n" + winner)
-        for player in players:
-            player.reset()
-        dealer.reset()
         step = "end1"
 
     if step == "end1":
@@ -940,7 +936,13 @@ while not crashed:
     if step == "end2":
         win()
         if((time() - end_times) > end_duration):
-            step = "initialization"
+            step = "end3"
+    
+    if step == "end3":
+        for player in players:
+            player.reset()
+        dealer.reset()
+        step = "initialization"
 
 
     ##########################
