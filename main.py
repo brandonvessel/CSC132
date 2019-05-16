@@ -611,16 +611,6 @@ RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LEDS = []
 
-for i in range(2):# needs to be changed to player count########################################################################
-    RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
-
-
-#RGB1 = RGB(1,18,19,20)
-#RGB2 = RGB(2,21,22,23)
-#RGB3 = RGB(3,24,25,26)
-
-#RGB_LEDS = [RGB1, RGB2, RGB3]
-
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(RGB_LED_INDICES, GPIO.OUT)
 GPIO.setup(buttons, GPIO.IN, pull_up_down = GPIO.PUD_DOWN)
@@ -732,6 +722,11 @@ while not crashed:
         
         # Dealer "only gets 1 card." 1 card is added during the dealer's turn
         hit(dealer)
+
+        # create and add an LED for each player 
+        RGB_LEDS = [] 
+        for i in range(player_count):# needs to be changed to player count######################################################################## 
+            RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
 
         # LEDs are initially off
         for led in RGB_LEDS:
