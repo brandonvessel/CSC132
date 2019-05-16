@@ -301,12 +301,12 @@ def win():
         for player in players:
             if get_score(player.hand) < 22:
                 place_text("Player {} won".format(player.number), x, y)
-                RGB_LEDS[player.number].green()
+                RGB_LEDS[player.number-1].green()
                 if(bets_tallied == False):
                     player.money += player.bet
             else:
                 place_text("Player {} lost".format(player.number), x, y)
-                RGB_LEDS[player.number].red()
+                RGB_LEDS[player.number-1].red()
                 if(bets_tallied == False):
                     player.money -= player.bet
             y += 50
@@ -320,18 +320,19 @@ def win():
                 if get_score(player.hand) > get_score(dealer.hand):
                     # that player won
                     place_text("Player {} won".format(player.number), x, y)
-                    RGB_LEDS[player.number].green()
+                    RGB_LEDS[player.number-1].green()
                     if(bets_tallied == False):
                         player.money += player.bet
 
                 elif get_score(player.hand) == get_score(dealer.hand):
                     # that player tied
                     place_text("Player {} tied the dealer".format(player.number), x, y)
-                    RGB_LEDS[player.number].blue()
+                    RGB_LEDS[player.number-1].blue()
                 
                 else:
                     # that player lost
                     place_text("Player {} lost".format(player.number), x, y)
+                    RGB_LEDS[player.number-1].red()
                     if(bets_tallied == False):
                         player.money -= player.bet
                 y += 50
@@ -632,7 +633,8 @@ sound_heyey = pygame.mixer.Sound('./sounds/effects/HEYYEYAAEYAAAEYAEYAA.ogg')
 sound_we = pygame.mixer.Sound('./sounds/effects/we_are_number_wow.ogg')
 sound_john_cena = pygame.mixer.Sound('./sounds/effects/john_cena.ogg')
 sound_guiles = pygame.mixer.Sound('./sounds/effects/guiles_theme.ogg')
-sound_victory = [sound_heyey, sound_we, sound_john_cena, sound_guiles, sound_victory]
+sound_sweet_victory = pygame.mixer.Sound('./sounds/effects/sweet_victory.ogg')
+sound_victory = [sound_heyey, sound_we, sound_john_cena, sound_guiles, sound_sweet_victory]
 
 # Loss
 sound_trololol = pygame.mixer.Sound('./sounds/effects/trololol.ogg')
