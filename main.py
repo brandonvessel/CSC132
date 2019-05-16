@@ -274,12 +274,13 @@ def hit(self):
 	self.hand.append(deck.pop())
 
 
-def win(winners):
+def win():
 	# Input: player object
 	# Output: none
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
     global deck
     global RGB_LEDS
+    global players
     x = 0
     y = 0
     while (y < display_height):
@@ -292,34 +293,36 @@ def win(winners):
         #each winner is printed to the screen
     x = display_width/2 - 75
     y = display_height/2-50
-    if (len(winners) == 0):
+
+    beat_dealer = False
+
+    for player in players:
+        if get_score(player) > get_score(dealer):
+            beat_dealer = True
+
+    if(beat_dealer):
+        for player in players:
+            if get_score(player) > get_score(dealer):
+                # that player won
+                place_text("Player {} won".format(player.number), x, y)
+                RGB_LEDS[player.number].green()
+                player.money += player.bet
+
+            elif get_score(player) == get_score(dealer):
+                # that player tied
+                place_text("Player {} tied the dealer".format(player.number), x, y)
+                RGB_LEDS[player.number].blue()
+            
+            else:
+                # that player lost
+                place_text("Player {} lost".format(player.number), x, y)
+                player.money -= player.bet
+            y += 50
+    else:
+        # Players lose
         for led in RGB_LEDS:
             led.red()
-        place_text("The dealer is the winner", x, y)
-        
-    elif (winners[len(winners) -1] == "tie"):
-        print_winners = winners[0:len(winners)-1]
-        for winner in print_winners:
-            for led in RGB_LEDS:
-                if(led.number == winner.number):
-                    led.blue()
-            for led in RGB_LEDS:
-                if(led.state!="blue"):
-                    led.red()
-            place_text("The dealer tied with Player {}".format(winner.number), x, y)
-            y += 50
-    
-    else:
-        for winner in winners:
-            for led in RGB_LEDS:
-                if(led.number==winner.number):
-                    led.green()
-            for led in RGB_LEDS:
-                if(led.state!="green"):
-                    led.red()
-                
-            place_text("Player {} won".format(winner.number), x, y)
-            y += 50
+        place_text("The dealer is the winner", x, y)        
 
 
 def dealer_turn():
@@ -349,7 +352,7 @@ def dealer_turn():
             valid += 1
 
     if(valid == 0):
-        return "All players busted, dealer wins!", []
+        return
 
     # iterate through players
     for player in players:
@@ -391,26 +394,6 @@ def dealer_turn():
         rand = randint(0,2)
         sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
         sleep(1.5)
-    
-    if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
-        return "Dealer wins!", []
-    elif(get_score(dealer.hand) == highest):
-        winners = []
-        for player in players:
-            if (get_score(player.hand) == highest):
-                winners.append(player)
-            winners.append("tie")
-            return "tied dealer...", winners
-                
-    else:
-        score = 0
-        statement = ""
-        winners = []
-        for player in players:
-            if(get_score(player.hand) < 22 and get_score(player.hand) > score):
-                statement = statement + "Player {} wins!\n".format(player)
-                winners.append(player)
-        return statement, winners
 
 
 def place_card(x, y, image):
@@ -908,7 +891,7 @@ while not crashed:
     #### Dealer Turn ####
     if step == "dealer_turn":
         # winner is the return value of dealer_turn()
-        winner, winners = dealer_turn()
+        dealer_turn()
         print("\n\n" + winner)
         for player in players:
             player.reset()
@@ -920,7 +903,7 @@ while not crashed:
         step = "end2"
 
     if step == "end2":
-        win(winners)
+        win()
         if((time() - end_times) > end_duration):
             step = "initialization"
 
