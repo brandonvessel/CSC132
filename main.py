@@ -607,6 +607,7 @@ gamerule_betting = False
 gamerule_charlie = True
 gamerule_bust_chance = True
 gamerule_guess_card = True
+gamerule_dank_memes = False
 
 
 #### Sounds ####
