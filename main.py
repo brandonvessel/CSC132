@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, shuffle
 import pygame
 import RPi.GPIO as GPIO
 from time import sleep, time
@@ -135,7 +135,7 @@ class Stack:
                 random_index = randint(0, len(self.cards) - 1)
                 self.cards[i], self.cards[random_index] = self.cards[random_index], self.cards[i]
         '''
-        shuffle(self.cards)
+        random.shuffle(self.cards)
 
 
     def print_deck(self):
@@ -575,8 +575,6 @@ card_backs = ["blue", "green", "gray", "blue", "red", "yellow"]
 
 ##### Pygame Setup #####
 # Room values
-#display_width = card_width * 10
-#display_height = card_height * player_count
 display_width = 800     # pi display width
 display_height = 480    # pi display height
 room_width = display_width      # just in case we decide to use these names later
@@ -633,15 +631,7 @@ RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LEDS = []
 
-for i in range(2):# needs to be changed to player count########################################################################
-    RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
 
-
-#RGB1 = RGB(1,18,19,20)
-#RGB2 = RGB(2,21,22,23)
-#RGB3 = RGB(3,24,25,26)
-
-#RGB_LEDS = [RGB1, RGB2, RGB3]
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(RGB_LED_INDICES, GPIO.OUT)
@@ -759,6 +749,9 @@ while not crashed:
         # Beginning variables
         player_turn = 0
         winner = ""
+
+        for i in range(2):# needs to be changed to player count
+            RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
 
         # Shuffle deck
         deck.shuffle()        
@@ -896,14 +889,14 @@ while not crashed:
             elif(gamerule_guess_card and not gamerule_bust_chance):
                 # just guess_card
                 card = deck.avgval()
-                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably get {}".format(chance), display_width/2, display_height/2)
 
             elif(gamerule_guess_card and gamerule_bust_chance):
                 # bust chance and guess card
                 chance = get_bust_chance(player.hand)
                 place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
                 card = deck.avgval()
-                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably get {}".format(chance), display_width/2, display_height/2 + 20)
 
         
         # Determing if all players have gone and move forward.
