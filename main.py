@@ -752,6 +752,8 @@ while not crashed:
         player_turn = 0
         winner = ""
 
+        RGB_LEDS = []
+
         for i in range(player_count):# needs to be changed to player count
             RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
 
