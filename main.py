@@ -599,7 +599,7 @@ sound_draw_card = [sound_draw_card1, sound_draw_card2]
 sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
 sound_wilson_wow = pygame.mixer.Sound('./sounds/effects/wilson_wow.ogg')
 sound_wally_wow = pygame.mixer.Sound('./sounds/effects/wally_wow.ogg')
-sound_blackjack = [sound_yes_yes, sound_wow]
+sound_blackjack = [sound_yes_yes, sound_wilson_wow, sound_wally_wow]
 
 
 ###########################################
