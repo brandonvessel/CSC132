@@ -572,7 +572,7 @@ def render_bets():
 
     y = 0
     i = 0
-    distance = card_width / 2
+    distance = card_width
     for player in players:
         x = card_width * 2
         chips = player.bet
@@ -580,17 +580,19 @@ def render_bets():
         while(chips / 5000 >= 1):
             chips -= 5000
             place_card(x, y, kkkkk)
-            x += card_width / distance
+            x += card_width
         # 2k
         while(chips / 2000 >= 1):
             chips -= 2000
             place_card(x, y, kk)
-            x += card_width / distance
+            x += card_width
         # 1k
         while(chips / 1000 >= 1):
             chips -= 1000
             place_card(x, y, k)
-            x += card_width / distance
+            x += card_width
+        
+        y += card_width
         
 
 
@@ -630,9 +632,9 @@ logo_image = pygame.transform.scale(logo_image, (646, 74))
 k = pygame.image.load("./sprites/ui/1k.png")
 kk = pygame.image.load("./sprites/ui/2k.png")
 kkkkk = pygame.image.load("./sprites/ui/5k.png")
-k = pygame.transform.scale(k, (card_width, card_height))
-kk = pygame.transform.scale(kk, (card_width, card_height))
-kkkkk = pygame.transform.scale(kkkkk, (card_width, card_height))
+k = pygame.transform.scale(k, (card_width * 2, card_height))
+kk = pygame.transform.scale(kk, (card_width * 2, card_height))
+kkkkk = pygame.transform.scale(kkkkk, (card_width * 2, card_height))
 
 
 
