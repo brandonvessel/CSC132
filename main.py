@@ -22,7 +22,7 @@ class Player(object):
         self.hand = []
         self.number = number
         self.money = 5000
-        self.bet = 0
+        self.bet = 1000
 
 
     def get_score(self):
@@ -295,6 +295,18 @@ def win():
     y = display_height/2-50
 
     beat_dealer = False
+
+    if(get_score(dealer.hand) > 21):
+        for player in players:
+            if get_score(player.hand) < 22:
+                place_text("Player {} won".format(player.number), x, y)
+                RGB_LEDS[player.number].green()
+                player.money += player.bet
+            else:
+                place_text("Player {} lost".format(player.number), x, y)
+                player.money -= player.bet
+            y += 50
+        return
 
     for player in players:
         if get_score(player.hand) > get_score(dealer.hand):
@@ -607,6 +619,10 @@ sound_draw_card = [sound_draw_card1, sound_draw_card2]
 sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
 sound_wilson_wow = pygame.mixer.Sound('./sounds/effects/wilson_wow.ogg')
 sound_wally_wow = pygame.mixer.Sound('./sounds/effects/wally_wow.ogg')
+HEYYEYAAEYAAAEYAEYAA.ogg
+guiles_theme.ogg
+trololol.ogg
+we_are_number_wow.ogg
 sound_blackjack = [sound_yes_yes, sound_wilson_wow, sound_wally_wow]
 
 
