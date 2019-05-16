@@ -895,7 +895,7 @@ while not crashed:
                 # bust chance and guess card
                 chance = get_bust_chance(player.hand)
                 place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
-                card = deck.avgval()
+                chance = deck.avgval()
                 place_text("You will probably get {}".format(chance), display_width/2, display_height/2 + 20)
 
         
