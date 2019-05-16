@@ -383,10 +383,7 @@ def dealer_turn():
         pygame.display.update()
         clock.tick(60)
         rand = randint(0,2)
-        if(rand == 0):
-            sound_draw_card1.play()
-        elif(rand == 1):
-            sound_draw_card2.play()
+        sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
         sleep(1.5)
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
@@ -587,14 +584,15 @@ pygame.mixer.music.load('./sounds/music/background_music.ogg')
 pygame.mixer.music.play(-1)
 
 # Sound Effects
-sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
-sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
 sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.ogg')
-sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
 sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
 
+# Draw Card
+sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
+sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
+sound_draw_card = [sound_draw_card1, sound_draw_card2]
 
 # Blackjack
 sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
@@ -725,7 +723,7 @@ while not crashed:
 
         # create and add an LED for each player 
         RGB_LEDS = [] 
-        for i in range(player_count):# needs to be changed to player count######################################################################## 
+        for i in range(player_count):# needs to be changed to player count
             RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
 
         # LEDs are initially off
@@ -800,7 +798,7 @@ while not crashed:
         # if player has blackjack, continue to next player
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
-            sound_yes_yes.play()
+            sound_blackjack[randint(0,len(sound_blackjack)-1)].play()
             led.green()
             player_turn += 1
 
@@ -812,11 +810,7 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            rand = randint(0, 2)
-            if(rand == 0):
-                sound_draw_card1.play()
-            elif(rand == 1):
-                sound_draw_card2.play()
+            sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
             hit(player)
             sleep(1)
 
@@ -844,14 +838,14 @@ while not crashed:
             elif(gamerule_guess_card and not gamerule_bust_chance):
                 # just guess_card
                 card = deck.avgval()
-                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably get {}".format(chance), display_width/2, display_height/2)
 
             elif(gamerule_guess_card and gamerule_bust_chance):
                 # bust chance and guess card
                 chance = get_bust_chance(player.hand)
                 place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
                 card = deck.avgval()
-                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably get {}".format(chance), display_width/2, display_height/2 + 20)
 
         
         # Determing if all players have gone and move forward.
