@@ -223,6 +223,11 @@ def get_score(hand):
     hasAce=False
     aceAdded=False
 
+    # Check for charlie
+    if(gamerule_charlie):
+        if(len(hand) == 5):
+            return 21
+
     # Iterate through cards, look for Ace
     for card in hand:
             if(card.name=="Ace"):
@@ -275,7 +280,7 @@ def hit(self):
 def win(winners):
 	# Input: player object
 	# Output: none
-	# Purpose: prints who won the game and asks the player(s) if they want to play again
+	# Purpose: prints who won the game and changes the leds to match
     global deck
     global RGB_LEDS
     x = 0
@@ -293,30 +298,32 @@ def win(winners):
     if (len(winners) == 0):
         for led in RGB_LEDS:
             led.red()
-        place_text("The dealer is the winner", x, y)
+        place_text("The dealer won", x, y)
         
     elif (winners[len(winners) -1] == "tie"):
-        winners.pop()
-        for winner in winners:
+        print_winners = winners[0:len(winners)-1]
+        for winner in print_winners:
             for led in RGB_LEDS:
-                if(led.number==winner.number):
+                if(led.number == winner.number):
                     led.purple()
             for led in RGB_LEDS:
-                if(led.state!="purple"):
+                if(led.state != "purple"):
                     led.red()
             place_text("The dealer tied with Player {}".format(winner.number), x, y)
             y += 50
+        return
     
-    for winner in winners:
-        for led in RGB_LEDS:
-            if(led.number==winner.number):
-                led.green()
-        for led in RGB_LEDS:
-            if(led.state!="green"):
-                led.red()
-            
-        place_text("Player {} is a winner".format(winner.number), x, y)
-        y += 50
+    else:
+        for winner in winners:
+            for led in RGB_LEDS:
+                if(led.number==winner.number):
+                    led.green()
+            for led in RGB_LEDS:
+                if(led.state != "green"):
+                    led.red()
+                
+            place_text("Player {} won".format(winner.number), x, y)
+            y += 50
 
 
 def dealer_turn():
@@ -381,11 +388,7 @@ def dealer_turn():
         render_cards()
         pygame.display.update()
         clock.tick(60)
-        rand = randint(0,2)
-        if(rand == 0):
-            sound_draw_card1.play()
-        elif(rand == 1):
-            sound_draw_card2.play()
+        sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
         sleep(1.5)
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
@@ -395,8 +398,8 @@ def dealer_turn():
         for player in players:
             if (get_score(player.hand) == highest):
                 winners.append(player)
-            winners.append("tie")
-            return "tied dealer...", winners
+        winners.append("tie")
+        return "tied dealer...", winners
                 
     else:
         score = 0
@@ -445,11 +448,15 @@ def make_button(x, y, ac, ic = blue, action = None, width = 100, height = 50):
 
 
 def mainButtonPressed():
+    # Location: main_menu
+    # Purpose: go to main_menu2
     global step
     step = "main_menu_2"
     print "derp"
 
 def quitGame():
+    # Location: main_menu
+    # Purpose: quit the game
     global crashed
     crashed = True
     GPIO.cleanup()
@@ -457,16 +464,27 @@ def quitGame():
     quit()
 
 def playerCount1():
+    # Location: main_menu2
+    # Purpose: 
     global player_count
     player_count = 1
+
 def playerCount2():
+    # Location: main_menu2
     global player_count
-    player_count = 2 
+    player_count = 2
+
 def playerCount3():
+    # Location: main_menu2
     global player_count
     player_count = 3
 
 def player_init():
+    # Location: main_menu2
+    try:
+        temp = player_count
+    except:
+        return
     global step
     step = "player_init"
 
@@ -519,7 +537,7 @@ def render_bets():
 
 
 ############################################
-############## INITIALIZATION ##############
+############## Initialization ##############
 ############################################
 ##### Deck initialization ####
 # Make deck as a stack object
@@ -564,18 +582,28 @@ gamerule_guess_card = False
 
 
 #### Sounds ####
-# Play Music
+# Music
 pygame.mixer.music.load('./sounds/music/background_music.ogg')
+
+# Play Music
 pygame.mixer.music.play(-1)
 
 # Sound Effects
-sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
-sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
 sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.ogg')
-sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
 sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
+
+# Draw card
+sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
+sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
+sound_draw_card = [sound_draw_card1, sound_draw_card2]
+
+# Blackjack
+sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
+sound_wilson_wow = pygame.mixer.Sound('./sounds/effects/wilson_wow.ogg')
+sound_wally_wow = pygame.mixer.Sound('./sounds/effects/wally_wow.ogg')
+sound_blackjack = [sound_yes_yes, sound_wow]
 
 
 ###########################################
@@ -777,7 +805,7 @@ while not crashed:
         # if player has blackjack, continue to next player
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
-            sound_yes_yes.play()
+            sound_blackjack[randint(0,len(sound_blackjack)-1)].play()
             led.green()
             player_turn += 1
 
@@ -789,11 +817,8 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            rand = randint(0, 2)
-            if(rand == 0):
-                sound_draw_card1.play()
-            elif(rand == 1):
-                sound_draw_card2.play()
+            sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
+
             hit(player)
             sleep(1)
 
