@@ -22,7 +22,7 @@ class Player(object):
         self.hand = []
         self.number = number
         self.money = 5000
-        self.bet = 0
+        self.bet = 1000
 
 
     def get_score(self):
@@ -99,7 +99,7 @@ class Stack:
         mysum = 0
         for card in self.cards:
             mysum += card.value[0]
-        return mysum/float(len(self.cards))
+        return round(mysum/float(len(self.cards)), 2)
 
     
     def shuffle(self):
@@ -274,12 +274,14 @@ def hit(self):
 	self.hand.append(deck.pop())
 
 
-def win(winners):
+def win():
 	# Input: player object
 	# Output: none
 	# Purpose: prints who won the game and asks the player(s) if they want to play again
     global deck
     global RGB_LEDS
+    global players
+    global bets_tallied
     x = 0
     y = 0
     while (y < display_height):
@@ -292,34 +294,59 @@ def win(winners):
         #each winner is printed to the screen
     x = display_width/2 - 75
     y = display_height/2-50
-    if (len(winners) == 0):
-        for led in RGB_LEDS:
-            led.red()
-        place_text("The dealer is the winner", x, y)
-        
-    elif (winners[len(winners) -1] == "tie"):
-        print_winners = winners[0:len(winners)-1]
-        for winner in print_winners:
-            for led in RGB_LEDS:
-                if(led.number == winner.number):
-                    led.blue()
-            for led in RGB_LEDS:
-                if(led.state!="blue"):
-                    led.red()
-            place_text("The dealer tied with Player {}".format(winner.number), x, y)
+
+    beat_dealer = False
+
+    if(get_score(dealer.hand) > 21):
+        for player in players:
+            if get_score(player.hand) < 22:
+                place_text("Player {} won".format(player.number), x, y)
+                RGB_LEDS[player.number-1].green()
+                if(bets_tallied == False):
+                    player.money += player.bet
+            else:
+                place_text("Player {} lost".format(player.number), x, y)
+                RGB_LEDS[player.number-1].red()
+                if(bets_tallied == False):
+                    player.money -= player.bet
             y += 50
-    
     else:
-        for winner in winners:
-            for led in RGB_LEDS:
-                if(led.number==winner.number):
-                    led.green()
-            for led in RGB_LEDS:
-                if(led.state!="green"):
-                    led.red()
+        for player in players:
+            if(get_score(player.hand) >= get_score(dealer.hand) and (get_score(player.hand) < 22)):
+                beat_dealer = True
+
+        if(beat_dealer and (bets_tallied == False)):
+            sound_victory[randint(0,len(sound_victory)-1)].play()
+
+        if(beat_dealer):
+            for player in players:
+                if(get_score(player.hand) > get_score(dealer.hand) and (get_score(player.hand) < 22)):
+                    # that player won
+                    place_text("Player {} won".format(player.number), x, y)
+                    RGB_LEDS[player.number-1].green()
+                    if(bets_tallied == False):
+                        player.money += player.bet
+
+                elif get_score(player.hand) == get_score(dealer.hand):
+                    # that player tied
+                    place_text("Player {} tied the dealer".format(player.number), x, y)
+                    RGB_LEDS[player.number-1].blue()
                 
-            place_text("Player {} won".format(winner.number), x, y)
-            y += 50
+                else:
+                    # that player lost
+                    place_text("Player {} lost".format(player.number), x, y)
+                    RGB_LEDS[player.number-1].red()
+                    if(bets_tallied == False):
+                        player.money -= player.bet
+                y += 50
+        else:
+            # Players lose
+            if(not bets_tallied):
+                sound_loss[randint(0,len(sound_loss)-1)].play()
+            for led in RGB_LEDS:
+                led.red()
+            place_text("The dealer is the winner", x, y)   
+    bets_tallied = True 
 
 
 def dealer_turn():
@@ -349,7 +376,7 @@ def dealer_turn():
             valid += 1
 
     if(valid == 0):
-        return "All players busted, dealer wins!", []
+        return
 
     # iterate through players
     for player in players:
@@ -362,6 +389,8 @@ def dealer_turn():
 
     # if the dealer is beating enough players it will stop
     while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
+        if(get_score(dealer.hand) > 21):
+            break
         if(dealer_done):
             break
         for player in players:
@@ -390,27 +419,7 @@ def dealer_turn():
         clock.tick(60)
         rand = randint(0,2)
         sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
-        sleep(1.5)
-    
-    if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
-        return "Dealer wins!", []
-    elif(get_score(dealer.hand) == highest):
-        winners = []
-        for player in players:
-            if (get_score(player.hand) == highest):
-                winners.append(player)
-            winners.append("tie")
-            return "tied dealer...", winners
-                
-    else:
-        score = 0
-        statement = ""
-        winners = []
-        for player in players:
-            if(get_score(player.hand) < 22 and get_score(player.hand) > score):
-                statement = statement + "Player {} wins!\n".format(player)
-                winners.append(player)
-        return statement, winners
+        sleep(2.5)
 
 
 def place_card(x, y, image):
@@ -459,10 +468,12 @@ def make_button(msg, x, y, ac, ic, action = None, width = 175, height = 50):
     gameDisplay.blit(textSurf, textRect)
         
 
+#play button on the main menu, advances to next screen
 def mainButtonPressed():
     global step
     step = "main_menu_2"
 
+#quit button on main menu
 def quitGame():
     global crashed
     crashed = True
@@ -470,11 +481,10 @@ def quitGame():
     pygame.quit()
     quit()
 
+#this toggle the player count to whichever button is pressed
 def playerCount1():
     global player_count
     player_count = 1
-    #make_button("1 Player", display_width/2-150, display_height/2, black, black, None, 150)
-    print "new button made"
     print player_count
 def playerCount2():
     global player_count
@@ -485,6 +495,7 @@ def playerCount3():
     player_count = 3
     print player_count
 
+#confirms the player count
 def player_init():
     try:
         temp = player_count
@@ -493,14 +504,15 @@ def player_init():
     global step
     step = "player_init"
 
+#starts game
 def initialize():
     global step
     step = "initialization"
+
+#toggles the game options 
 def gamerule_hide_cardsButton():
     global gamerule_hide_cards
-    #if gamerule_hide_cards = Tr
     gamerule_hide_cards = not gamerule_hide_cards
-    print gamerule_hide_cards
 def gamerule_bettingButton():
     global gamerule_betting
     gamerule_betting = not gamerule_betting
@@ -524,7 +536,10 @@ def render_cards():
     for player in players:
         x = card_width
         for card in player.hand:
-            place_card(x, y, card.image)
+            if(gamerule_hide_cards and player.number - 1 >= player_turn):
+                place_card(x, y, card_back)
+            else:
+                place_card(x, y, card.image)
             x += card_width
         y += card_height
     
@@ -550,7 +565,7 @@ def render_bets():
     x = 0
     y = 0
     for print_index in range(0, player_count):
-        place_text("Money: {}".format(players[print_index].money), x, y)
+        place_text("Chips: {}".format(players[print_index].money), x, y)
         y += card_height/2.0
         place_text("Bet: {}".format(players[print_index].bet), x, y)
         y += card_height/2.0
@@ -623,6 +638,19 @@ sound_wilson_wow = pygame.mixer.Sound('./sounds/effects/wilson_wow.ogg')
 sound_wally_wow = pygame.mixer.Sound('./sounds/effects/wally_wow.ogg')
 sound_blackjack = [sound_yes_yes, sound_wilson_wow, sound_wally_wow]
 
+# Victory
+sound_heyey = pygame.mixer.Sound('./sounds/effects/HEYYEYAAEYAAAEYAEYAA.ogg')
+sound_we = pygame.mixer.Sound('./sounds/effects/we_are_number_wow.ogg')
+sound_john_cena = pygame.mixer.Sound('./sounds/effects/john_cena.ogg')
+sound_guiles = pygame.mixer.Sound('./sounds/effects/guiles_theme.ogg')
+sound_sweet_victory = pygame.mixer.Sound('./sounds/effects/sweet_victory.ogg')
+sound_victory = [sound_heyey, sound_we, sound_john_cena, sound_guiles, sound_sweet_victory]
+
+# Loss
+sound_trololol = pygame.mixer.Sound('./sounds/effects/trololol.ogg')
+sound_bustin = pygame.mixer.Sound('./sounds/effects/bustin.ogg')
+sound_loss = [sound_trololol, sound_bustin]
+
 
 ###########################################
 ############## GPIO setup #################
@@ -669,33 +697,36 @@ while not crashed:
         button_pressed = False
 
         # Start button
-        make_button("start", display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
+        make_button("start", display_width/2-50, display_height/2-100, blue, black, mainButtonPressed)
         
         # Quit button
-        make_button("quit", display_width/2+100, display_height/2-100, blue, black, quitGame)
+        make_button("quit", display_width/2-50, display_height/2, blue, black, quitGame)
 
     
     if step == "main_menu_2":
         global player_count
         #### Player Management ####
-        # Change to 1 player
             
-        make_button("1 Player", display_width/2-200, display_height/2+100, black, blue, playerCount1, 150)
+       # Change to 1 player
         if (player_count == 1):   
-            make_button("1 Player", display_width/2-200, display_height/2+100, black, black, None, 150)
+            make_button("1 Player", 50, display_height/2+100, blue, blue, None)
+        else:
+            make_button("1 Player", 50, display_height/2+100, blue, black, playerCount1)
         
         # Change to 2 player
-        make_button("2 Players", display_width/2, display_height/2+100, black, blue, playerCount2, 150)
         if (player_count == 2):   
-            make_button("2 Players", display_width/2, display_height/2+100, black, black, None, 150)
+            make_button("2 Players", display_width/2-75, display_height/2+100, blue, blue, None)
+        else:
+             make_button("2 Players", display_width/2-75, display_height/2+100, blue, black, playerCount2)
 
         # Change to 3 player
-        make_button("3 Players", display_width/2+200, display_height/2+100, black, blue, playerCount3, 150)
         if (player_count == 3):   
-            make_button("3 Players", display_width/2+200, display_height/2+100, black, black, None, 150)
+            make_button("3 Players", display_width/2+200, display_height/2+100, blue, blue, None)
+        else:
+             make_button("3 Players", display_width/2+200, display_height/2+100, blue, black, playerCount3)
 
         # Next button
-        make_button("NEXT", display_width/2, display_height/2-200, blue, black, player_init)
+        make_button("NEXT", display_width/2-75, display_height/2-200, blue, black, player_init)
         
         if step == "player_init":
             ##### Player Initialization ####
@@ -713,26 +744,31 @@ while not crashed:
     if step == "main_menu_3":
         # Game Options
        
+        #toggles the hide cards rule
         if (gamerule_hide_cards == True):
             make_button("Hide cards", 100, 100, blue, blue, gamerule_hide_cardsButton, 175)
         else:
              make_button("Hide cards", 100, 100, blue, black, gamerule_hide_cardsButton, 175)
 
+        #toggles the betting rule
         if (gamerule_betting == True):
             make_button("Betting", 100, 175, blue, blue, gamerule_bettingButton, 175)
         else:
             make_button("Betting", 100, 175, blue, black, gamerule_bettingButton, 175)
 
+        #toggles the charlie rule
         if (gamerule_charlie == True):
             make_button("Charlie", 100, 250, blue, blue, gamerule_charlieButton, 175)
         else:
             make_button("Charlie", 100, 250, blue, black, gamerule_charlieButton, 175)
 
+        #toggles the bust chance rule
         if (gamerule_bust_chance == True):
             make_button("Bust chance", 300, 100, blue, blue, gamerule_bust_chanceButton, 175)
         else:
             make_button("Bust chance", 300, 100, blue, black, gamerule_bust_chanceButton, 175)
 
+        #toggles the guess card rule
         if (gamerule_guess_card == True):
             make_button("Guess card", 300, 175, blue, blue, gamerule_guess_cardButton, 175)
         else:
@@ -751,6 +787,7 @@ while not crashed:
         # Beginning variables
         player_turn = 0
         winner = ""
+        bets_tallied = False
 
         RGB_LEDS = []
 
@@ -811,7 +848,7 @@ while not crashed:
                 sound_chip_clink.play()
             else:
                 led.red()
-            sleep(0.5)
+            sleep(0.2)
             led.blue()
         
         ## STOP BETTING ##
@@ -827,7 +864,7 @@ while not crashed:
                 print("Player {} decreased their bet".format(player))
                 player.bet -=  1000
                 sound_chip_clink.play()
-                sleep(0.5)
+                sleep(0.2)
         
         # Determing if all players have gone and move forward.
         if(player_turn == len(players)):
@@ -884,19 +921,19 @@ while not crashed:
             if(gamerule_bust_chance and not gamerule_guess_card):
                 # just bustchance
                 chance = get_bust_chance(player.hand)
-                place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
+                place_text("Your bust chance is {}".format(str(chance)), display_width-100, display_height-100)
 
             elif(gamerule_guess_card and not gamerule_bust_chance):
                 # just guess_card
                 chance = deck.avgval()
-                place_text("You will probably get {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably get {}".format(chance), display_width-100, display_height-100)
 
             elif(gamerule_guess_card and gamerule_bust_chance):
                 # bust chance and guess card
                 chance = get_bust_chance(player.hand)
-                place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
+                place_text("Your bust chance is {}".format(str(chance)), display_width-100, display_height-100)
                 chance = deck.avgval()
-                place_text("You will probably get {}".format(chance), display_width/2, display_height/2 + 20)
+                place_text("You will probably get {}".format(chance), display_width-100, display_height-50)
 
         
         # Determing if all players have gone and move forward.
@@ -908,11 +945,7 @@ while not crashed:
     #### Dealer Turn ####
     if step == "dealer_turn":
         # winner is the return value of dealer_turn()
-        winner, winners = dealer_turn()
-        print("\n\n" + winner)
-        for player in players:
-            player.reset()
-        dealer.reset()
+        dealer_turn()
         step = "end1"
 
     if step == "end1":
@@ -920,9 +953,15 @@ while not crashed:
         step = "end2"
 
     if step == "end2":
-        win(winners)
+        win()
         if((time() - end_times) > end_duration):
-            step = "initialization"
+            step = "end3"
+    
+    if step == "end3":
+        for player in players:
+            player.reset()
+        dealer.reset()
+        step = "initialization"
 
 
     ##########################
@@ -934,7 +973,8 @@ while not crashed:
     if(step == "betting"):
         render_bets()
     else:
-        render_cards()
+        if(step != "end2"):
+            render_cards()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
