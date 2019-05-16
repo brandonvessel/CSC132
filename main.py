@@ -99,7 +99,7 @@ class Stack:
         mysum = 0
         for card in self.cards:
             mysum += card.value[0]
-        return mysum
+        return mysum/float(len(self.cards))
 
     
     def shuffle(self):
