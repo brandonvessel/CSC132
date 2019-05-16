@@ -499,9 +499,7 @@ def playerCount3():
 
 #confirms the player count
 def player_init():
-    try:
-        temp = player_count
-    except:
+    if(player_count == 0):
         return
     global step
     step = "player_init"
@@ -574,23 +572,23 @@ def render_bets():
 
     y = 0
     i = 0
-    distance = card_width / 4
+    distance = card_width / 2
     for player in players:
         x = card_width * 2
         chips = player.bet
         # 5k
-        while(chips / 5 > 1):
-            chips -= 5
+        while(chips / 5000 >= 1):
+            chips -= 5000
             place_card(x, y, kkkkk)
             x += card_width / distance
         # 2k
-        while(chips / 2 > 1):
-            chips -= 2
+        while(chips / 2000 >= 1):
+            chips -= 2000
             place_card(x, y, kk)
             x += card_width / distance
         # 1k
-        while(chips / 1 >= 1):
-            chips -= 1
+        while(chips / 1000 >= 1):
+            chips -= 1000
             place_card(x, y, k)
             x += card_width / distance
         
