@@ -298,6 +298,8 @@ def win():
     beat_dealer = False
 
     if(get_score(dealer.hand) > 21):
+        if(bets_tallied == False):
+            sound_victory[randint(0,len(sound_victory)-1)].play()
         for player in players:
             if get_score(player.hand) < 22:
                 place_text("Player {} won".format(player.number), x, y)
@@ -567,6 +569,30 @@ def render_bets():
         place_text("Bet: {}".format(players[print_index].bet), x, y)
         y += card_height/2.0
 
+    y = 0
+    i = 0
+    distance = card_width / 4
+    for player in players:
+        x = card_width * 2
+        chips = player.bet
+        # 5k
+        while(chips / 5 > 1):
+            chips -= 5
+            place_card(x, y, kkkkk)
+            x += card_width / distance
+        # 2k
+        while(chips / 2 > 1):
+            chips -= 2
+            place_card(x, y, kk)
+            x += card_width / distance
+        # 1k
+        while(chips / 1 >= 1):
+            chips -= 1
+            place_card(x, y, k)
+            x += card_width / distance
+        
+
+
 
 ############################################
 ############## INITIALIZATION ##############
@@ -598,6 +624,17 @@ turn_indicator = pygame.transform.scale(turn_indicator, (card_width, card_height
 background_image = pygame.image.load("./sprites/background/background.png")
 logo_image = pygame.image.load("./sprites/ui/logo.png")
 logo_image = pygame.transform.scale(logo_image, (646, 74))
+
+# Chips
+k = pygame.image.load("./sprites/ui/1k.png")
+kk = pygame.image.load("./sprites/ui/2k.png")
+kkkkk = pygame.image.load("./sprites/ui/5k.png")
+k = pygame.transform.scale(k, (card_width, card_height))
+kk = pygame.transform.scale(kk, (card_width, card_height))
+kkkkk = pygame.transform.scale(kkkkk, (card_width, card_height))
+
+
+
 
 # Engine
 clock = pygame.time.Clock()
