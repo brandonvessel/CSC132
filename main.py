@@ -18,6 +18,8 @@ class Player(object):
         # List of cards in hand
         self.hand = []
         self.number = number
+        self.money = 5000
+        self.bet = 0
 
 
     def get_score(self):
@@ -224,11 +226,16 @@ def get_score(hand):
     hasAce=False
     aceAdded=False
 
+    # Check for charlie
+    if(gamerule_charlie):
+        if(len(hand) == 5):
+            return 21
+
     # Iterate through cards, look for Ace
     for card in hand:
-            if(card.name=="Ace"):
-                scores.append(0)
-                hasAce=True
+        if(card.name=="Ace"):
+            scores.append(0)
+            hasAce=True
 
     if(hasAce):
         for card in hand:
@@ -382,7 +389,6 @@ def dealer_turn():
         render_cards()
         pygame.display.update()
         clock.tick(60)
-        rand = randint(0,2)
         sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
         sleep(1.5)
     
@@ -545,8 +551,6 @@ card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
 
 ##### Pygame Setup #####
 # Room values
-#display_width = card_width * 10
-#display_height = card_height * player_count
 display_width = 800     # pi display width
 display_height = 480    # pi display height
 room_width = display_width      # just in case we decide to use these names later
@@ -573,9 +577,9 @@ end_duration = 5 # seconds to display the end/victory message
 # Game Opions
 gamerule_hide_cards = False
 gamerule_betting = False
-gamerule_charlie = False
+gamerule_charlie = True
 gamerule_bust_chance = True
-gamerule_guess_card = False
+gamerule_guess_card = True
 
 
 #### Sounds ####
