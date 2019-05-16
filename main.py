@@ -9,6 +9,9 @@ pygame.init()
 blue = (0, 0, 255)
 black = (0,0,0)
 red = (255,0,0)
+green = (0,255,0)
+button_clicked = False
+player_count = 0
 ############################################
 ################# CLASSES ##################
 ############################################
@@ -432,9 +435,8 @@ def text_objects(text, font):
     textSurface = font.render(text, True, red)
     return textSurface, textSurface.get_rect()
 
-def make_button(msg, x, y, ac, ic = blue, action = None, width = 100, height = 50):
+def make_button(msg, x, y, ac, ic, action = None, width = 175, height = 50):
     # creates a button using an x and y coordinate, witdth, height, color, and
-    
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
     
@@ -444,6 +446,7 @@ def make_button(msg, x, y, ac, ic = blue, action = None, width = 100, height = 5
 
         #runs a function when the button is clicked
         if (click[0] == 1 and action != None):
+            button_clicked = True
             action()
             sleep(0.5)
     else:
@@ -454,6 +457,9 @@ def make_button(msg, x, y, ac, ic = blue, action = None, width = 100, height = 5
     textSurf, textRect = text_objects(msg, smallText)
     textRect.center = ((x+(width/2)), (y+(height/2)))
     gameDisplay.blit(textSurf, textRect)
+
+    
+        
 
 
 def mainButtonPressed():
@@ -470,13 +476,20 @@ def quitGame():
 
 def playerCount1():
     global player_count
+    global button_clicked
+    button_clicked = True
     player_count = 1
+    #make_button("1 Player", display_width/2-150, display_height/2, black, black, None, 150)
+    print "new button made"
+    print player_count
 def playerCount2():
     global player_count
-    player_count = 2 
+    player_count = 2
+    print player_count
 def playerCount3():
     global player_count
     player_count = 3
+    print player_count
 
 def player_init():
     global step
@@ -486,10 +499,19 @@ def initialize():
     step = "initialization"
 def gamerule_hide_cardsButton():
     global gamerule_hide_cards
-    gamerule_hide_cards
+    gamerule_hide_cards = not gamerule_hide_cards
 def gamerule_bettingButton():
-    global gamerule_hide_cards
-    gamerule_hide_cards = true
+    global gamerule_betting
+    gamerule_betting = not gamerule_betting
+def gamerule_charlieButton():
+    global gamerule_charlie
+    gamerule_charlie = not gamerule_charlie
+def gamerule_bust_chanceButton():
+    global gamerule_bust_chance
+    gamerule_bust_chance = not gamerule_bust_chance
+def gamerule_guess_cardButton():
+    global gamerule_guess_card
+    gamerule_guess_card = not gamerule_guess_card
     
 
 
@@ -655,15 +677,23 @@ while not crashed:
 
     
     if step == "main_menu_2":
+        global player_count
         #### Player Management ####
         # Change to 1 player
-        make_button("1 Player", display_width/2-150, display_height/2+100, black, blue, playerCount1, 150)
+            
+        make_button("1 Player", display_width/2-200, display_height/2+100, black, blue, playerCount1, 150)
+        if (player_count == 1):   
+            make_button("1 Player", display_width/2-200, display_height/2+100, black, black, None, 150)
         
         # Change to 2 player
         make_button("2 Players", display_width/2, display_height/2+100, black, blue, playerCount2, 150)
+        if (player_count == 2):   
+            make_button("2 Players", display_width/2, display_height/2+100, black, black, None, 150)
 
         # Change to 3 player
-        make_button("3 Players", display_width/2+150, display_height/2+100, black, blue, playerCount3, 150)
+        make_button("3 Players", display_width/2+200, display_height/2+100, black, blue, playerCount3, 150)
+        if (player_count == 3):   
+            make_button("3 Players", display_width/2+200, display_height/2+100, black, black, None, 150)
 
         # Next button
         make_button("NEXT", display_width/2, display_height/2-200, blue, black, player_init)
@@ -689,11 +719,16 @@ while not crashed:
         
     if step == "main_menu_3":
         # Game Options
-        make_button("Hide cards", 100, 100, blue, black, gamerule_hide_cardsButton, 150)
-        make_button("Betting", 100, 200, blue, black, gamerule_bettingButton, 150)
+        make_button("Hide cards", 100, 100, blue, black, gamerule_hide_cardsButton, 175)
+        if (gamerule_hide_cards == True):
+            make_button("Hide cards", 100, 100, blue, blue, gamerule_hide_cardsButton, 175)
+        make_button("Betting", 100, 175, blue, black, gamerule_bettingButton, 175)
+        make_button("Charlie", 100, 250, blue, black, gamerule_charlieButton, 175)
+        make_button("Bust chance", 300, 100, blue, black, gamerule_bust_chanceButton, 175)
+        make_button("Guess card", 300, 175, blue, black, gamerule_guess_cardButton, 175)
 
         # Play button
-        make_button("PLAY", display_width-100, display_height-100, blue, black, initialize)
+        make_button("PLAY", display_width/2-50, display_height-175, blue, black, initialize)
 
 
     ###################
