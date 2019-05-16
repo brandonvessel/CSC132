@@ -137,7 +137,7 @@ class Stack:
                 random_index = randint(0, len(self.cards) - 1)
                 self.cards[i], self.cards[random_index] = self.cards[random_index], self.cards[i]
         '''
-        random.shuffle(self.cards)
+        shuffle(self.cards)
 
 
     def print_deck(self):
@@ -752,7 +752,7 @@ while not crashed:
         player_turn = 0
         winner = ""
 
-        for i in range(2):# needs to be changed to player count
+        for i in range(player_count):# needs to be changed to player count
             RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
 
         # Shuffle deck
