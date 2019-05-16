@@ -378,7 +378,15 @@ def dealer_turn():
             print "losing so hit"
             hit(dealer)
             print "score after: {}".format(get_score(dealer.hand))
+        place_card(0,0,background_image)
         render_cards()
+        pygame.display.update()
+        clock.tick(60)
+        rand = randint(0,2)
+        if(rand == 0):
+            sound_draw_card1.play()
+        elif(rand == 1):
+            sound_draw_card2.play()
         sleep(1.5)
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
@@ -551,8 +559,6 @@ turn_indicator = pygame.image.load("./sprites/ui/turn_indicator.png")
 turn_indicator = pygame.transform.scale(turn_indicator, (card_width, card_height))
 
 # Background
-#black = (0,0,0)
-#green = (0,100,0)
 background_image = pygame.image.load("./sprites/background/background.png")
 logo_image = pygame.image.load("./sprites/ui/logo.png")
 logo_image = pygame.transform.scale(logo_image, (646, 74))
@@ -576,12 +582,13 @@ pygame.mixer.music.load('./sounds/music/background_music.ogg')
 pygame.mixer.music.play(-1)
 
 # Sound Effects
-sound_draw_card = pygame.mixer.Sound('./sounds/effects/draw_card.ogg')
+sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
+sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
-sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.wav')
+sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.ogg')
 sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
-sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.wav')
+sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
 
 
 ###########################################
@@ -591,12 +598,17 @@ buttons = [17, 16, 13]
 RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
+RGB_LEDS = []
 
-RGB1 = RGB(1,18,19,20)
-RGB2 = RGB(2,21,22,23)
-RGB3 = RGB(3,24,25,26)
+for i in range(2):# needs to be changed to player count########################################################################
+    RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
 
-RGB_LEDS = [RGB1, RGB2, RGB3]
+
+#RGB1 = RGB(1,18,19,20)
+#RGB2 = RGB(2,21,22,23)
+#RGB3 = RGB(3,24,25,26)
+
+#RGB_LEDS = [RGB1, RGB2, RGB3]
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(RGB_LED_INDICES, GPIO.OUT)
@@ -692,8 +704,8 @@ while not crashed:
         print "Deck shuffled"
 
         # Determine card backs
-        #card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
-        card_back = pygame.image.load("./sprites/cards/tech_back.png")
+        card_back = pygame.image.load("./sprites/cards/{}_back.png".format(card_backs[randint(0, len(card_backs)-1)]))
+        #card_back = pygame.image.load("./sprites/cards/tech_back.png")
         card_back = pygame.transform.scale(card_back, (card_width, card_height))
 
         # Set 2 cards in each players hand
@@ -708,9 +720,8 @@ while not crashed:
         hit(dealer)
 
         # LEDs are initially off
-        RGB1.off()
-        RGB2.off()
-        RGB3.off()
+        for led in RGB_LEDS:
+            led.off()
 
         # Change step
         if(gamerule_betting):
@@ -792,7 +803,11 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            sound_draw_card.play()
+            rand = randint(0, 2)
+            if(rand == 0):
+                sound_draw_card1.play()
+            elif(rand == 1):
+                sound_draw_card2.play()
             hit(player)
             sleep(1)
 
