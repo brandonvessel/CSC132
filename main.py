@@ -8,6 +8,7 @@ from math import floor
 pygame.init()
 blue = (0, 0, 255)
 black = (0,0,0)
+red = (255,0,0)
 ############################################
 ################# CLASSES ##################
 ############################################
@@ -190,12 +191,19 @@ class RGB():
         GPIO.output(self.b,False)
         self.state = "green"
         
-    def blue(self):                     # blue led means its the current players turn or tie
+    def blue(self):                     # blue led means its the current players turn
         # Turn on blue pin, Turn off other pins.
         GPIO.output(self.r,False)
         GPIO.output(self.g,False)
         GPIO.output(self.b,True)
         self.state = "blue"
+        
+    def purple(self):                   # purple means tied with dealer
+        # Turn on blue and red pin, Turn off other pins.
+        GPIO.output(self.r,True)
+        GPIO.output(self.g,False)
+        GPIO.output(self.b,True)
+        self.state = "purple"
         
     def off(self):
         # Turn off all pins.
@@ -215,11 +223,6 @@ def get_score(hand):
     scores=[0]
     hasAce=False
     aceAdded=False
-
-    # Check for charlie
-    if(gamerule_charlie):
-        if(len(hand) == 5):
-            return 21
 
     # Iterate through cards, look for Ace
     for card in hand:
@@ -273,7 +276,7 @@ def hit(self):
 def win(winners):
 	# Input: player object
 	# Output: none
-	# Purpose: prints who won the game and changes the leds to match
+	# Purpose: prints who won the game and asks the player(s) if they want to play again
     global deck
     global RGB_LEDS
     x = 0
@@ -291,31 +294,30 @@ def win(winners):
     if (len(winners) == 0):
         for led in RGB_LEDS:
             led.red()
-        place_text("The dealer won", x, y)
+        place_text("The dealer is the winner", x, y)
         
     elif (winners[len(winners) -1] == "tie"):
-        print_winners = winners[0:len(winners)-1]
-        for winner in print_winners:
-            for led in RGB_LEDS:
-                if(led.number == winner.number):
-                    led.blue()
-            for led in RGB_LEDS:
-                if(led.state!="blue"):
-                    led.red()
-
-            place_text("The dealer tied with Player {}".format(winner.number), x, y)
-            y += 50
-    else:
+        winners.pop()
         for winner in winners:
             for led in RGB_LEDS:
                 if(led.number==winner.number):
-                    led.green()
+                    led.purple()
             for led in RGB_LEDS:
-                if(led.state!="green"):
+                if(led.state!="purple"):
                     led.red()
-                
-            place_text("Player {} won".format(winner.number), x, y)
+            place_text("The dealer tied with Player {}".format(winner.number), x, y)
             y += 50
+    
+    for winner in winners:
+        for led in RGB_LEDS:
+            if(led.number==winner.number):
+                led.green()
+        for led in RGB_LEDS:
+            if(led.state!="green"):
+                led.red()
+            
+        place_text("Player {} is a winner".format(winner.number), x, y)
+        y += 50
 
 
 def dealer_turn():
@@ -355,18 +357,14 @@ def dealer_turn():
     # if the dealer is beating enough players it will stop
     while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
         if(dealer_done):
-            if((get_bust_chance(dealer.hand) != 0) and len(dealer.hand) != 1):
-                break
+            break
         for player in players:
             losers = 0
             if(get_score(dealer.hand) > get_score(player.hand)):
                 losers+=1
-            if(get_score(player.hand) > 21):
-                losers+=1
         if(losers >= floor(len(players)/2.0)):
-            print "dealer is beating {} players so stop".format(losers);
-            dealer_done = True
-            break
+           dealer_done = True
+           break
 
         
         if(get_score(dealer.hand) == get_score(player.hand)):
@@ -384,7 +382,11 @@ def dealer_turn():
         render_cards()
         pygame.display.update()
         clock.tick(60)
-        sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
+        rand = randint(0,2)
+        if(rand == 0):
+            sound_draw_card1.play()
+        elif(rand == 1):
+            sound_draw_card2.play()
         sleep(1.5)
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
@@ -394,8 +396,8 @@ def dealer_turn():
         for player in players:
             if (get_score(player.hand) == highest):
                 winners.append(player)
-        winners.append("tie")
-        return "tied dealer...", winners
+            winners.append("tie")
+            return "tied dealer...", winners
                 
     else:
         score = 0
@@ -426,33 +428,40 @@ def place_text(text, x, y):
     gameDisplay.blit(textsurface,(x,y))
 
 
-def make_button(x, y, ac, ic = blue, action = None, width = 100, height = 50):
+def text_objects(text, font):
+    textSurface = font.render(text, True, red)
+    return textSurface, textSurface.get_rect()
+
+def make_button(msg, x, y, ac, ic = blue, action = None, width = 100, height = 50):
     # creates a button using an x and y coordinate, witdth, height, color, and
     
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
-
-
+    
+    #checks to see is the mouse is over a button
     if x+width > mouse[0] > x and y+height > mouse[1] > y:
         pygame.draw.rect(gameDisplay, ac,(x,y,width,height))
 
+        #runs a function when the button is clicked
         if (click[0] == 1 and action != None):
             action()
             sleep(0.5)
     else:
         pygame.draw.rect(gameDisplay, ic,(x,y,width,height))
 
+    #text is put on button
+    smallText = pygame.font.SysFont("comicsansms",40)
+    textSurf, textRect = text_objects(msg, smallText)
+    textRect.center = ((x+(width/2)), (y+(height/2)))
+    gameDisplay.blit(textSurf, textRect)
+
 
 def mainButtonPressed():
-    # Location: main_menu
-    # Purpose: go to main_menu2
     global step
     step = "main_menu_2"
-    print "derp"
+    #print "derp"
 
 def quitGame():
-    # Location: main_menu
-    # Purpose: quit the game
     global crashed
     crashed = True
     GPIO.cleanup()
@@ -460,33 +469,27 @@ def quitGame():
     quit()
 
 def playerCount1():
-    # Location: main_menu2
-    # Purpose: 
     global player_count
     player_count = 1
-
 def playerCount2():
-    # Location: main_menu2
     global player_count
-    player_count = 2
-
+    player_count = 2 
 def playerCount3():
-    # Location: main_menu2
     global player_count
     player_count = 3
 
 def player_init():
-    # Location: main_menu2
-    try:
-        temp = player_count
-    except:
-        return
     global step
     step = "player_init"
-
 def initialize():
     global step
     step = "initialization"
+def gamerule_hide_cardsButton():
+    global gamerule_hide_cards
+    gamerule_hide_cards
+def gamerule_bettingButton():
+    global gamerule_hide_cards
+    gamerule_hide_cards = true
     
 
 
@@ -533,7 +536,7 @@ def render_bets():
 
 
 ############################################
-############## Initialization ##############
+############## INITIALIZATION ##############
 ############################################
 ##### Deck initialization ####
 # Make deck as a stack object
@@ -562,7 +565,8 @@ turn_indicator = pygame.transform.scale(turn_indicator, (card_width, card_height
 
 # Background
 background_image = pygame.image.load("./sprites/background/background.png")
-menu_image = pygame.image.load("./sprites/background/background_blank.png")
+logo_image = pygame.image.load("./sprites/ui/logo.png")
+logo_image = pygame.transform.scale(logo_image, (646, 74))
 
 # Engine
 clock = pygame.time.Clock()
@@ -578,28 +582,18 @@ gamerule_guess_card = False
 
 
 #### Sounds ####
-# Music
-pygame.mixer.music.load('./sounds/music/background_music.ogg')
-
 # Play Music
+pygame.mixer.music.load('./sounds/music/background_music.ogg')
 pygame.mixer.music.play(-1)
 
 # Sound Effects
+sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
+sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
 sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.ogg')
-sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
-
-# Draw card
-sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
-sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
-sound_draw_card = [sound_draw_card1, sound_draw_card2]
-
-# Blackjack
 sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
-sound_wilson_wow = pygame.mixer.Sound('./sounds/effects/wilson_wow.ogg')
-sound_wally_wow = pygame.mixer.Sound('./sounds/effects/wally_wow.ogg')
-sound_blackjack = [sound_yes_yes, sound_wow]
+sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
 
 
 ###########################################
@@ -611,9 +605,8 @@ RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LEDS = []
 
-for i in range(3):# needs to be changed to player count########################################################################
+for i in range(2):# needs to be changed to player count########################################################################
     RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
-    
 
 
 #RGB1 = RGB(1,18,19,20)
@@ -650,29 +643,30 @@ while not crashed:
     ###################
 
     if step == "main_menu":
+        place_card(75,0,logo_image)
         players = []
         button_pressed = False
 
         # Start button
-        make_button(display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
+        make_button("start", display_width/2-100, display_height/2-100, blue, black, mainButtonPressed)
         
         # Quit button
-        make_button(display_width/2+100, display_height/2-100, blue, black, quitGame)
+        make_button("quit", display_width/2+100, display_height/2-100, blue, black, quitGame)
 
     
     if step == "main_menu_2":
         #### Player Management ####
         # Change to 1 player
-        make_button(display_width/2-100, display_height/2+100, black, blue, playerCount1)
+        make_button("1 Player", display_width/2-150, display_height/2+100, black, blue, playerCount1, 150)
         
         # Change to 2 player
-        make_button(display_width/2, display_height/2+100, black, blue, playerCount2)
+        make_button("2 Players", display_width/2, display_height/2+100, black, blue, playerCount2, 150)
 
         # Change to 3 player
-        make_button(display_width/2+100, display_height/2+100, black, blue, playerCount3)
+        make_button("3 Players", display_width/2+150, display_height/2+100, black, blue, playerCount3, 150)
 
         # Next button
-        make_button(display_width/2, display_height/2-200, blue, black, player_init)
+        make_button("NEXT", display_width/2, display_height/2-200, blue, black, player_init)
         
         if step == "player_init":
             ##### Player Initialization ####
@@ -695,9 +689,11 @@ while not crashed:
         
     if step == "main_menu_3":
         # Game Options
+        make_button("Hide cards", 100, 100, blue, black, gamerule_hide_cardsButton, 150)
+        make_button("Betting", 100, 200, blue, black, gamerule_bettingButton, 150)
 
         # Play button
-        make_button(display_width-100, display_height-100, blue, black, initialize)
+        make_button("PLAY", display_width-100, display_height-100, blue, black, initialize)
 
 
     ###################
@@ -802,7 +798,7 @@ while not crashed:
         # if player has blackjack, continue to next player
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
-            sound_blackjack[randint(0,len(sound_blackjack)-1)].play()
+            sound_yes_yes.play()
             led.green()
             player_turn += 1
 
@@ -814,8 +810,11 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
-
+            rand = randint(0, 2)
+            if(rand == 0):
+                sound_draw_card1.play()
+            elif(rand == 1):
+                sound_draw_card2.play()
             hit(player)
             sleep(1)
 
