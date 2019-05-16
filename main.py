@@ -888,7 +888,7 @@ while not crashed:
 
             elif(gamerule_guess_card and not gamerule_bust_chance):
                 # just guess_card
-                card = deck.avgval()
+                chance = deck.avgval()
                 place_text("You will probably get {}".format(chance), display_width/2, display_height/2)
 
             elif(gamerule_guess_card and gamerule_bust_chance):
