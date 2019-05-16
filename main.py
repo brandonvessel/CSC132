@@ -128,10 +128,13 @@ class Stack:
             # Jack, Queen, King
             for name in card_names:
                 self.push(Card(name, suit, [10]))
-        for j in range(0, 52):
+        '''
+        for j in range(0, 5):
             for i in range(0, len(self.cards) - 1):
                 random_index = randint(0, len(self.cards) - 1)
                 self.cards[i], self.cards[random_index] = self.cards[random_index], self.cards[i]
+        '''
+        self.cards.shuffle()
 
 
     def print_deck(self):
@@ -145,7 +148,7 @@ class Card():
         self.name = name    # The name of the card
         self.suit = suit    # The suit of the card (Spades, Hearts, Diamonds, Clubs)
         self.value = values # The numerical value of the card (integer)
-        self.image = "./sprites/cards/2C.png"
+
         if(self.value[0] == 10 and self.name[0] == "1"):
             # Special case for the 10 because it is weird
             self.image = pygame.image.load("./sprites/cards/{}{}.png".format("10", suit[0]))
@@ -337,7 +340,11 @@ def dealer_turn():
     dealer_done = False
     # dealer only has 1 card, hit
     hit(dealer)
+    place_card(0,0,background_image)
     render_cards()
+    pygame.display.update()
+    clock.tick(60)
+    sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
     sleep(1.5)
     # find highest scoring player
     highest = 0
@@ -462,7 +469,6 @@ def make_button(msg, x, y, ac, ic = blue, action = None, width = 100, height = 5
 def mainButtonPressed():
     global step
     step = "main_menu_2"
-    #print "derp"
 
 def quitGame():
     global crashed
@@ -482,8 +488,13 @@ def playerCount3():
     player_count = 3
 
 def player_init():
+    try:
+        temp = player_count
+    except:
+        return
     global step
     step = "player_init"
+
 def initialize():
     global step
     step = "initialization"
@@ -532,9 +543,9 @@ def render_bets():
     x = 0
     y = 0
     for print_index in range(0, player_count):
-        place_text("Money: {}".format(money[print_index]), x, y)
+        place_text("Money: {}".format(players[print_index].money), x, y)
         y += card_height/2.0
-        place_text("Bet: {}".format(bets[print_index]), x, y)
+        place_text("Bet: {}".format(players[print_index].bet), x, y)
         y += card_height/2.0
 
 
@@ -635,6 +646,7 @@ while not crashed:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 step = "main_menu"
+                dealer.reset()
 
 
     ###################
@@ -675,12 +687,6 @@ while not crashed:
             for i in range(player_count):
                 # add a player until player count is met
                 players.append(Player(i+1))
-            
-            # Initialize player money
-            money = [5000, 5000, 5000]
-
-            # Initialize bets
-            bets = [0,0,0]
 
             # Create dealer #
             dealer = Dealer()
@@ -746,12 +752,12 @@ while not crashed:
         led = RGB_LEDS[player_turn]
 
         # Revive all the players that suck
-        if(money[player_turn] == 0):
-            money[player_turn] = 1000
+        if(player.money == 0):
+            player.money = 1000
 
         # Regulate bets
-        if(bets[player_turn] > money[player_turn]):
-            bets[player_turn] -= 1000
+        if(player.bet > player.money):
+            player.bet -= 1000
         
         # Current player led is blue
         led.blue()
@@ -759,8 +765,8 @@ while not crashed:
         ## BET MORE ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} bet".format(player))
-            if(bets[player_turn] < money[player_turn]):
-                bets[player_turn] +=  1000
+            if(player.bet < player.money):
+                player.bet +=  1000
                 sound_chip_clink.play()
             else:
                 led.red()
@@ -776,9 +782,9 @@ while not crashed:
             
         ## GO DOWN IN BET ##
         if (GPIO.input(buttons[2]) == GPIO.HIGH):
-            if(bets[player_turn] != 1000):
+            if(player.bet != 1000):
                 print("Player {} decreased their bet".format(player))
-                bets[player_turn] -=  1000
+                player.bet -=  1000
                 sound_chip_clink.play()
                 sleep(0.5)
         
