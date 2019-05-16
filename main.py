@@ -21,8 +21,6 @@ class Player(object):
         # List of cards in hand
         self.hand = []
         self.number = number
-        self.money = 5000
-        self.bet = 0
 
 
     def get_score(self):
@@ -229,16 +227,11 @@ def get_score(hand):
     hasAce=False
     aceAdded=False
 
-    # Check for charlie
-    if(gamerule_charlie):
-        if(len(hand) == 5):
-            return 21
-
     # Iterate through cards, look for Ace
     for card in hand:
-        if(card.name=="Ace"):
-            scores.append(0)
-            hasAce=True
+            if(card.name=="Ace"):
+                scores.append(0)
+                hasAce=True
 
     if(hasAce):
         for card in hand:
@@ -392,7 +385,11 @@ def dealer_turn():
         render_cards()
         pygame.display.update()
         clock.tick(60)
-        sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
+        rand = randint(0,2)
+        if(rand == 0):
+            sound_draw_card1.play()
+        elif(rand == 1):
+            sound_draw_card2.play()
         sleep(1.5)
     
     if(get_score(dealer.hand) > highest and get_score(dealer.hand) < 22):
@@ -479,8 +476,6 @@ def quitGame():
 
 def playerCount1():
     global player_count
-    global button_clicked
-    button_clicked = True
     player_count = 1
     #make_button("1 Player", display_width/2-150, display_height/2, black, black, None, 150)
     print "new button made"
@@ -502,7 +497,9 @@ def initialize():
     step = "initialization"
 def gamerule_hide_cardsButton():
     global gamerule_hide_cards
+    #if gamerule_hide_cards = Tr
     gamerule_hide_cards = not gamerule_hide_cards
+    print gamerule_hide_cards
 def gamerule_bettingButton():
     global gamerule_betting
     gamerule_betting = not gamerule_betting
@@ -573,6 +570,8 @@ card_backs = ["blue", "green", "gray", "purple", "red", "yellow"]
 
 ##### Pygame Setup #####
 # Room values
+#display_width = card_width * 10
+#display_height = card_height * player_count
 display_width = 800     # pi display width
 display_height = 480    # pi display height
 room_width = display_width      # just in case we decide to use these names later
@@ -599,9 +598,9 @@ end_duration = 5 # seconds to display the end/victory message
 # Game Opions
 gamerule_hide_cards = False
 gamerule_betting = False
-gamerule_charlie = True
+gamerule_charlie = False
 gamerule_bust_chance = True
-gamerule_guess_card = True
+gamerule_guess_card = False
 
 
 #### Sounds ####
@@ -610,21 +609,13 @@ pygame.mixer.music.load('./sounds/music/background_music.ogg')
 pygame.mixer.music.play(-1)
 
 # Sound Effects
+sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
+sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
 sound_excited_aw = pygame.mixer.Sound('./sounds/effects/excited_aw.ogg')
 sound_sad_aw = pygame.mixer.Sound('./sounds/effects/sad_aw.ogg')
 sound_menu_click = pygame.mixer.Sound('./sounds/effects/menu_click.ogg')
-sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
-
-# Draw Card
-sound_draw_card1 = pygame.mixer.Sound('./sounds/effects/draw_card1.ogg')
-sound_draw_card2 = pygame.mixer.Sound('./sounds/effects/draw_card2.ogg')
-sound_draw_card = [sound_draw_card1, sound_draw_card2]
-
-# Blackjack
 sound_yes_yes = pygame.mixer.Sound('./sounds/effects/yes_yes.ogg')
-sound_wilson_wow = pygame.mixer.Sound('./sounds/effects/wilson_wow.ogg')
-sound_wally_wow = pygame.mixer.Sound('./sounds/effects/wally_wow.ogg')
-sound_blackjack = [sound_yes_yes, sound_wilson_wow, sound_wally_wow]
+sound_chip_clink = pygame.mixer.Sound('./sounds/effects/chip_clink.ogg')
 
 
 ###########################################
@@ -635,6 +626,16 @@ RGB_LED = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 
 RGB_LED_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26]
 RGB_LEDS = []
+
+for i in range(2):# needs to be changed to player count########################################################################
+    RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
+
+
+#RGB1 = RGB(1,18,19,20)
+#RGB2 = RGB(2,21,22,23)
+#RGB3 = RGB(3,24,25,26)
+
+#RGB_LEDS = [RGB1, RGB2, RGB3]
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(RGB_LED_INDICES, GPIO.OUT)
@@ -718,13 +719,31 @@ while not crashed:
         
     if step == "main_menu_3":
         # Game Options
-        make_button("Hide cards", 100, 100, blue, black, gamerule_hide_cardsButton, 175)
+       
         if (gamerule_hide_cards == True):
             make_button("Hide cards", 100, 100, blue, blue, gamerule_hide_cardsButton, 175)
-        make_button("Betting", 100, 175, blue, black, gamerule_bettingButton, 175)
-        make_button("Charlie", 100, 250, blue, black, gamerule_charlieButton, 175)
-        make_button("Bust chance", 300, 100, blue, black, gamerule_bust_chanceButton, 175)
-        make_button("Guess card", 300, 175, blue, black, gamerule_guess_cardButton, 175)
+        else:
+             make_button("Hide cards", 100, 100, blue, black, gamerule_hide_cardsButton, 175)
+
+        if (gamerule_betting == True):
+            make_button("Betting", 100, 175, blue, blue, gamerule_bettingButton, 175)
+        else:
+            make_button("Betting", 100, 175, blue, black, gamerule_bettingButton, 175)
+
+        if (gamerule_charlie == True):
+            make_button("Charlie", 100, 250, blue, blue, gamerule_charlieButton, 175)
+        else:
+            make_button("Charlie", 100, 250, blue, black, gamerule_charlieButton, 175)
+
+        if (gamerule_bust_chance == True):
+            make_button("Bust chance", 300, 100, blue, blue, gamerule_bust_chanceButton, 175)
+        else:
+            make_button("Bust chance", 300, 100, blue, black, gamerule_bust_chanceButton, 175)
+
+        if (gamerule_guess_card == True):
+            make_button("Guess card", 300, 175, blue, blue, gamerule_guess_cardButton, 175)
+        else:
+            make_button("Guess card", 300, 175, blue, black, gamerule_guess_cardButton, 175)
 
         # Play button
         make_button("PLAY", display_width/2-50, display_height-175, blue, black, initialize)
@@ -759,11 +778,6 @@ while not crashed:
         
         # Dealer "only gets 1 card." 1 card is added during the dealer's turn
         hit(dealer)
-
-        # create and add an LED for each player 
-        RGB_LEDS = [] 
-        for i in range(player_count):# needs to be changed to player count
-            RGB_LEDS.append(RGB((i+1), (3*i)+18,(3*i)+19, (3*i)+20))
 
         # LEDs are initially off
         for led in RGB_LEDS:
@@ -837,7 +851,7 @@ while not crashed:
         # if player has blackjack, continue to next player
         if (get_score(player.hand) == 21):
             print ("Blackjack! Next player")
-            sound_blackjack[randint(0,len(sound_blackjack)-1)].play()
+            sound_yes_yes.play()
             led.green()
             player_turn += 1
 
@@ -849,7 +863,11 @@ while not crashed:
         ## HIT ##
         if (GPIO.input(buttons[0]) == GPIO.HIGH):
             print("Player {} hit".format(player))
-            sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
+            rand = randint(0, 2)
+            if(rand == 0):
+                sound_draw_card1.play()
+            elif(rand == 1):
+                sound_draw_card2.play()
             hit(player)
             sleep(1)
 
@@ -877,14 +895,14 @@ while not crashed:
             elif(gamerule_guess_card and not gamerule_bust_chance):
                 # just guess_card
                 card = deck.avgval()
-                place_text("You will probably get {}".format(chance), display_width/2, display_height/2)
+                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
 
             elif(gamerule_guess_card and gamerule_bust_chance):
                 # bust chance and guess card
                 chance = get_bust_chance(player.hand)
                 place_text("Your bust chance is {}".format(str(chance)), display_width/2, display_height/2)
                 card = deck.avgval()
-                place_text("You will probably get {}".format(chance), display_width/2, display_height/2 + 20)
+                place_text("You will probably get a {}".format(chance), display_width/2, display_height/2)
 
         
         # Determing if all players have gone and move forward.
