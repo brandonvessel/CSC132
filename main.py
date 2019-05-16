@@ -315,9 +315,12 @@ def win():
             if get_score(player.hand) >= get_score(dealer.hand):
                 beat_dealer = True
 
+        if(beat_dealer and (bets_tallied == False)):
+            sound_victory[randint(0,len(sound_victory)-1)].play()
+
         if(beat_dealer):
             for player in players:
-                if get_score(player.hand) > get_score(dealer.hand):
+                if(get_score(player.hand) > get_score(dealer.hand) and (get_score(player.hand) < 22)):
                     # that player won
                     place_text("Player {} won".format(player.number), x, y)
                     RGB_LEDS[player.number-1].green()
@@ -338,6 +341,8 @@ def win():
                 y += 50
         else:
             # Players lose
+            if(not bets_tallied):
+                sound_loss[randint(0,len(sound_loss)-1)].play()
             for led in RGB_LEDS:
                 led.red()
             place_text("The dealer is the winner", x, y)   
@@ -383,7 +388,9 @@ def dealer_turn():
     player = highest_player
 
     # if the dealer is beating enough players it will stop
-    while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21) and (get_score(dealer.hand) < 22)):
+    while((get_score(dealer.hand) <= get_score(player.hand)) and (get_score(dealer.hand)!=21)):
+        if(get_score(dealer) > 21):
+            break
         if(dealer_done):
             break
         for player in players:
@@ -412,7 +419,7 @@ def dealer_turn():
         clock.tick(60)
         rand = randint(0,2)
         sound_draw_card[randint(0,len(sound_draw_card)-1)].play()
-        sleep(1.5)
+        sleep(2.5)
 
 
 def place_card(x, y, image):
@@ -829,7 +836,7 @@ while not crashed:
                 sound_chip_clink.play()
             else:
                 led.red()
-            sleep(0.5)
+            sleep(0.2)
             led.blue()
         
         ## STOP BETTING ##
@@ -845,7 +852,7 @@ while not crashed:
                 print("Player {} decreased their bet".format(player))
                 player.bet -=  1000
                 sound_chip_clink.play()
-                sleep(0.5)
+                sleep(0.2)
         
         # Determing if all players have gone and move forward.
         if(player_turn == len(players)):
@@ -954,7 +961,8 @@ while not crashed:
     if(step == "betting"):
         render_bets()
     else:
-        render_cards()
+        if(step != "end2"):
+            render_cards()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
